@@ -1,0 +1,288 @@
+[
+  {
+    "code": "N01",
+    "title": "家庭连接",
+    "surface": "mobile",
+    "file": "mobile/N01-家庭连接.png",
+    "note": "连接失效场景",
+    "dimensions": [
+      824,
+      1330
+    ]
+  },
+  {
+    "code": "N02",
+    "title": "今天",
+    "surface": "mobile",
+    "file": "mobile/N02-今天.png",
+    "note": "默认场景：今天尚未开展",
+    "dimensions": [
+      824,
+      5244
+    ]
+  },
+  {
+    "code": "N03",
+    "title": "活动详情",
+    "surface": "mobile",
+    "file": "mobile/N03-活动详情.png",
+    "note": "从今天打开第一项",
+    "dimensions": [
+      824,
+      2860
+    ]
+  },
+  {
+    "code": "N04",
+    "title": "记录与同步",
+    "surface": "mobile",
+    "file": "mobile/N04-记录与同步.png",
+    "note": "记录弹层",
+    "dimensions": [
+      824,
+      1676
+    ]
+  },
+  {
+    "code": "N05",
+    "title": "换活动",
+    "surface": "mobile",
+    "file": "mobile/N05-换活动.png",
+    "note": "换活动弹层",
+    "dimensions": [
+      824,
+      1302
+    ]
+  },
+  {
+    "code": "N06",
+    "title": "书架与活动",
+    "surface": "mobile",
+    "file": "mobile/N06-书架与活动.png",
+    "note": "底部导航",
+    "dimensions": [
+      824,
+      3964
+    ]
+  },
+  {
+    "code": "N07",
+    "title": "阶段指引",
+    "surface": "mobile",
+    "file": "mobile/N07-阶段指引.png",
+    "note": "底部导航",
+    "dimensions": [
+      824,
+      2352
+    ]
+  },
+  {
+    "code": "N08",
+    "title": "阶段支持示例",
+    "surface": "mobile",
+    "file": "mobile/N08-阶段支持示例.png",
+    "note": "从阶段指引进入",
+    "dimensions": [
+      824,
+      2150
+    ]
+  },
+  {
+    "code": "N09",
+    "title": "成长",
+    "surface": "mobile",
+    "file": "mobile/N09-成长.png",
+    "note": "含一条照片待上传记录",
+    "dimensions": [
+      824,
+      1726
+    ]
+  },
+  {
+    "code": "N10",
+    "title": "成长记录表单",
+    "surface": "mobile",
+    "file": "mobile/N10-成长记录表单.png",
+    "note": "记录弹层",
+    "dimensions": [
+      824,
+      1092
+    ]
+  },
+  {
+    "code": "N11",
+    "title": "测量记录",
+    "surface": "mobile",
+    "file": "mobile/N11-测量记录.png",
+    "note": "空表单",
+    "dimensions": [
+      824,
+      1936
+    ]
+  },
+  {
+    "code": "N12",
+    "title": "家庭设置",
+    "surface": "mobile",
+    "file": "mobile/N12-家庭设置.png",
+    "note": "页头工具入口",
+    "dimensions": [
+      824,
+      2332
+    ]
+  },
+  {
+    "code": "W01",
+    "title": "连接与家庭选择",
+    "surface": "parent",
+    "file": "parent/W01-连接与家庭选择.png",
+    "note": "默认入口",
+    "dimensions": [
+      1736,
+      1768
+    ]
+  },
+  {
+    "code": "W02",
+    "title": "今天与本周",
+    "surface": "parent",
+    "file": "parent/W02-今天与本周.png",
+    "note": "主导航",
+    "dimensions": [
+      1736,
+      4450
+    ]
+  },
+  {
+    "code": "W03",
+    "title": "安排查看与调整",
+    "surface": "parent",
+    "file": "parent/W03-安排查看与调整.png",
+    "note": "主导航",
+    "dimensions": [
+      1736,
+      6524
+    ]
+  },
+  {
+    "code": "W04",
+    "title": "阶段路线",
+    "surface": "parent",
+    "file": "parent/W04-阶段路线.png",
+    "note": "主导航",
+    "dimensions": [
+      1736,
+      2614
+    ]
+  },
+  {
+    "code": "W05",
+    "title": "书架整理",
+    "surface": "parent",
+    "file": "parent/W05-书架整理.png",
+    "note": "主导航",
+    "dimensions": [
+      1736,
+      1566
+    ]
+  },
+  {
+    "code": "W06",
+    "title": "成长档案",
+    "surface": "parent",
+    "file": "parent/W06-成长档案.png",
+    "note": "主导航",
+    "dimensions": [
+      1736,
+      1548
+    ]
+  },
+  {
+    "code": "W07",
+    "title": "打印与导出",
+    "surface": "parent",
+    "file": "parent/W07-打印与导出.png",
+    "note": "主导航",
+    "dimensions": [
+      1736,
+      2812
+    ]
+  },
+  {
+    "code": "W08",
+    "title": "家庭与成员设置",
+    "surface": "parent",
+    "file": "parent/W08-家庭与成员设置.png",
+    "note": "主导航",
+    "dimensions": [
+      1736,
+      2642
+    ]
+  },
+  {
+    "code": "C01",
+    "title": "角色与连接",
+    "surface": "admin",
+    "file": "admin/C01-角色与连接.png",
+    "note": "内容管理导航",
+    "dimensions": [
+      1840,
+      2204
+    ]
+  },
+  {
+    "code": "C02",
+    "title": "内容库",
+    "surface": "admin",
+    "file": "admin/C02-内容库.png",
+    "note": "内容管理导航",
+    "dimensions": [
+      1840,
+      2390
+    ]
+  },
+  {
+    "code": "C03",
+    "title": "草稿编辑",
+    "surface": "admin",
+    "file": "admin/C03-草稿编辑.png",
+    "note": "默认场景：草稿",
+    "dimensions": [
+      1840,
+      4786
+    ]
+  },
+  {
+    "code": "C04",
+    "title": "审核",
+    "surface": "admin",
+    "file": "admin/C04-审核.png",
+    "note": "内容管理导航",
+    "dimensions": [
+      1840,
+      4076
+    ]
+  },
+  {
+    "code": "C05",
+    "title": "发布",
+    "surface": "admin",
+    "file": "admin/C05-发布.png",
+    "note": "内容管理导航",
+    "dimensions": [
+      1840,
+      2068
+    ]
+  },
+  {
+    "code": "C06",
+    "title": "版本与撤回",
+    "surface": "admin",
+    "file": "admin/C06-版本与撤回.png",
+    "note": "内容管理导航",
+    "dimensions": [
+      1840,
+      1496
+    ]
+  }
+]

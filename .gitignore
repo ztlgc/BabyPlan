@@ -1,0 +1,45 @@
+# 依赖、运行环境与缓存
+.work/
+.claude/
+node_modules/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+**/build/
+**/dist/
+**/coverage/
+**/__pycache__/
+*.pyc
+.idea/
+.vscode/
+**/android/local.properties
+**/ios/Pods/
+
+# 凭证、签名和真实家庭资料
+.env
+.env.*
+!.env.example
+!**/.env.example
+*.jks
+*.keystore
+key.properties
+*.pem
+*.key
+runtime/
+private/
+backups/
+uploads/
+*.db
+*.sqlite
+*.sqlite3
+*.log
+
+# 可重建的大型产物
+*.apk
+*.aab
+deliverables/*.zip
+releases/**/*.zip
+
+# 用户原有的本机诊断脚本，不属于产品
+/diag-vhd.ps1
+/godis.py

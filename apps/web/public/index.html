@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="#F7F5EF">
+    <title>小芽 · BabyPlan 家长网页</title>
+    <link rel="icon" href="/babyplan-icon.png" type="image/png">
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">跳到主要内容</a>
+
+    <section id="login-view" class="login-shell" aria-labelledby="login-title">
+      <div class="login-brand" aria-hidden="true">
+        <span class="brand-mark">芽</span>
+        <span>小芽 · BabyPlan</span>
+      </div>
+      <div class="login-layout">
+        <div class="login-intro">
+          <p class="eyebrow">每天一点，一起长大</p>
+          <h1 id="login-title">家长网页</h1>
+          <p>在一处查看陪伴安排、活动玩法与家庭协作记录。这里只显示真实家庭数据。</p>
+          <ul class="quiet-list">
+            <li>会话由 HttpOnly Cookie 保管，访问令牌不会写入浏览器存储。</li>
+            <li>七天视图和活动详情都从家长 API 读取。</li>
+            <li>凭家庭管理员设置的邀请码，可以直接在网页创建家长账号。</li>
+            <li>未连接或接口未完成时，页面会直接说明，不生成演示结果。</li>
+          </ul>
+        </div>
+
+        <div class="login-card">
+          <h2>登录家庭</h2>
+          <form id="login-form" novalidate>
+            <div class="field">
+              <label for="email">邮箱</label>
+              <input id="email" name="email" type="email" autocomplete="username" maxlength="254" required>
+              <p class="field-error" id="email-error"></p>
+            </div>
+            <div class="field">
+              <label for="web-pass">密码</label>
+              <input id="web-pass" type="&#112;assword" autocomplete="current-&#112;assword" maxlength="256" required>
+              <p class="field-error" id="web-pass-error"></p>
+            </div>
+            <details class="connection-settings">
+              <summary>连接设置</summary>
+              <div class="field">
+                <label for="api-base">API 地址</label>
+                <input id="api-base" name="api-base" type="text" inputmode="url" spellcheck="false" autocomplete="off">
+                <p class="field-hint">默认使用同源 /v2；本地网页服务器会代理到 127.0.0.1:4318。</p>
+                <p class="field-error" id="api-base-error"></p>
+              </div>
+            </details>
+            <p id="login-error" class="form-alert" role="alert" hidden></p>
+            <button id="login-button" class="button button-primary button-wide" type="submit">
+              <span>登录</span>
+            </button>
+          </form>
+
+          <details id="signup-details" class="signup-panel">
+            <summary>有邀请码？创建家长账号</summary>
+            <p class="field-hint">邀请码由家庭管理员创建。创建成功后会自动加入该家庭，并直接进入网页。</p>
+            <form id="signup-form" novalidate>
+              <div class="field">
+                <label for="signup-code">邀请码</label>
+                <input id="signup-code" type="text" autocomplete="off" maxlength="32" spellcheck="false" required>
+                <p class="field-hint">4～32 个字符，可使用中文、字母、数字、下划线或短横线。</p>
+                <p class="field-error" id="signup-code-error"></p>
+              </div>
+              <div class="field">
+                <label for="signup-email">邮箱</label>
+                <input id="signup-email" type="email" autocomplete="username" maxlength="254" required>
+                <p class="field-error" id="signup-email-error"></p>
+              </div>
+              <div class="field">
+                <label for="signup-name">家里怎么称呼你</label>
+                <input id="signup-name" type="text" autocomplete="name" maxlength="60" required>
+                <p class="field-error" id="signup-name-error"></p>
+              </div>
+              <div class="field">
+                <label for="signup-pass">设置密码</label>
+                <input id="signup-pass" type="&#112;assword" autocomplete="new-&#112;assword" minlength="12" maxlength="256" required>
+                <p class="field-hint">至少 12 位。账号只用于这个私有家庭服务。</p>
+                <p class="field-error" id="signup-pass-error"></p>
+              </div>
+              <p id="signup-error" class="form-alert" role="alert" hidden></p>
+              <button id="signup-button" class="button button-primary button-wide" type="submit">
+                <span>创建账号并加入家庭</span>
+              </button>
+            </form>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <div id="app-shell" class="app-shell" hidden>
+      <header class="app-header">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">芽</span>
+          <div>
+            <p class="eyebrow">每天一点，一起长大</p>
+            <p class="brand-name">小芽 · BabyPlan</p>
+          </div>
+        </div>
+
+        <div class="header-controls">
+          <div class="compact-field">
+            <label for="family-select">家庭</label>
+            <select id="family-select"></select>
+          </div>
+          <div class="compact-field">
+            <label for="child-select">孩子</label>
+            <select id="child-select"></select>
+          </div>
+          <div class="user-menu">
+            <span id="current-user"></span>
+            <button id="logout-button" class="button button-quiet" type="button">退出</button>
+          </div>
+        </div>
+      </header>
+
+      <div class="app-body">
+        <nav class="side-nav" aria-label="主要页面">
+          <button class="nav-button is-active" type="button" data-view="schedule" aria-current="page">
+            <span class="nav-symbol" aria-hidden="true">今</span>
+            <span>陪伴安排</span>
+          </button>
+          <button class="nav-button" type="button" data-view="settings">
+            <span class="nav-symbol" aria-hidden="true">家</span>
+            <span>家庭设置</span>
+          </button>
+          <button class="nav-button" type="button" data-view="growth">
+            <span class="nav-symbol" aria-hidden="true">长</span>
+            <span>成长与书架</span>
+          </button>
+          <button id="content-nav" class="nav-button" type="button" data-view="content" hidden>
+            <span class="nav-symbol" aria-hidden="true">审</span>
+            <span>内容工作台</span>
+          </button>
+          <p class="nav-note">安排与记录与手机端使用同一份家庭事实。</p>
+        </nav>
+
+        <main id="main-content" class="main-content" tabindex="-1">
+          <div id="global-status" class="global-status" role="status" aria-live="polite" hidden></div>
+
+          <section id="view-schedule" class="view" aria-labelledby="schedule-heading">
+            <div class="page-title-row">
+              <div>
+                <p class="eyebrow">家庭概览</p>
+                <h1 id="schedule-heading">今天，一起玩点什么？</h1>
+              </div>
+              <button id="refresh-button" class="button button-quiet" type="button">刷新</button>
+            </div>
+
+            <section id="family-overview" class="overview-card" aria-labelledby="family-overview-title">
+              <div class="overview-main">
+                <p class="section-kicker">当前家庭</p>
+                <h2 id="family-overview-title">正在读取家庭信息</h2>
+                <p id="family-overview-summary" class="muted">请稍候。</p>
+              </div>
+              <div id="overview-members" class="member-summary" aria-label="家庭成员"></div>
+            </section>
+
+            <section class="schedule-section" aria-labelledby="schedule-dates-title">
+              <div class="section-heading-row">
+                <div>
+                  <p class="section-kicker">未来七天</p>
+                  <h2 id="schedule-dates-title">选择一天</h2>
+                </div>
+                <div class="view-switch" role="group" aria-label="安排范围">
+                  <button id="day-mode-button" class="segment is-active" type="button" aria-pressed="true">一天</button>
+                  <button id="week-mode-button" class="segment" type="button" aria-pressed="false">七天</button>
+                  <button id="print-button" class="button button-quiet print-trigger" type="button" hidden>打印 A4</button>
+                </div>
+              </div>
+              <div id="date-strip" class="date-strip" role="group" aria-label="七天日期"></div>
+            </section>
+
+            <section id="day-view" class="schedule-layout" aria-live="polite">
+              <div id="day-plan-panel" class="panel"></div>
+              <aside id="detail-panel" class="detail-panel" aria-labelledby="detail-heading">
+                <div class="empty-detail">
+                  <p class="section-kicker">活动详情</p>
+                  <h2 id="detail-heading">选择一个活动</h2>
+                  <p>材料、玩法、亲子对话和安全提示会显示在这里。</p>
+                </div>
+              </aside>
+            </section>
+
+            <section id="week-view" class="week-grid" aria-live="polite" hidden></section>
+          </section>
+
+          <section id="view-settings" class="view" aria-labelledby="settings-heading" hidden>
+            <div class="page-title-row">
+              <div>
+                <p class="eyebrow">家庭设置</p>
+                <h1 id="settings-heading">家庭成员与偏好</h1>
+              </div>
+              <button id="refresh-preferences-button" class="button button-quiet" type="button">刷新偏好</button>
+            </div>
+
+            <div class="settings-grid">
+              <section class="panel" aria-labelledby="members-heading">
+                <p class="section-kicker">共同照护</p>
+                <h2 id="members-heading">家庭成员</h2>
+                <div id="members-list" class="stack"></div>
+                <div id="member-management" class="stack"></div>
+              </section>
+
+              <section class="panel" aria-labelledby="preferences-heading">
+                <p class="section-kicker">安排依据</p>
+                <h2 id="preferences-heading">家庭偏好</h2>
+                <div id="preferences-content" class="stack"></div>
+              </section>
+            </div>
+
+            <div class="settings-grid settings-grid-secondary">
+              <section class="panel" aria-labelledby="child-settings-heading">
+                <p class="section-kicker">年龄精度</p>
+                <h2 id="child-settings-heading">孩子资料</h2>
+                <p class="muted">可以只记月龄和记录日期，也可以改用出生日期。这里不会根据生日推算发育结论。</p>
+                <div id="child-settings" class="stack"></div>
+              </section>
+
+              <section class="panel" aria-labelledby="invitation-heading">
+                <p class="section-kicker">只限受邀成员</p>
+                <h2 id="invitation-heading">邀请与加入</h2>
+                <div id="invitation-actions" class="stack"></div>
+              </section>
+            </div>
+
+            <section id="danger-zone" class="panel danger-zone" aria-labelledby="danger-zone-heading">
+              <p class="section-kicker">不可撤销的数据操作</p>
+              <h2 id="danger-zone-heading">重新验证与删除家庭</h2>
+              <p class="muted">永久删除会冻结家庭访问、撤销下载，并异步清理数据库、照片和导出。必须先重新输入当前账号密码。</p>
+              <div id="privacy-actions" class="stack"></div>
+            </section>
+
+            <section id="service-boundary" class="boundary-note" aria-labelledby="boundary-heading">
+              <h2 id="boundary-heading">当前连接边界</h2>
+              <p id="boundary-text">页面只提交到真实 API。服务端尚未实现的接口会显示错误，并以“未保存”为准。</p>
+              <p id="boundary-api" class="mono muted"></p>
+            </section>
+          </section>
+
+          <section id="view-growth" class="view" aria-labelledby="growth-heading" hidden>
+            <div class="page-title-row">
+              <div>
+                <p class="eyebrow">成长与家庭书架</p>
+                <h1 id="growth-heading">把真实发生的小事留住</h1>
+                <p class="page-subtitle">记录来自家庭 API；页面不会把参与次数自动变成发育成就，也不计算医学百分位。</p>
+              </div>
+              <div class="page-actions">
+                <button id="growth-print-button" class="button button-quiet" type="button">打印 A4</button>
+                <button id="refresh-growth-button" class="button button-quiet" type="button">刷新</button>
+              </div>
+            </div>
+
+            <div id="growth-status" class="inline-alert" role="status" aria-live="polite" hidden></div>
+
+            <div class="growth-layout">
+              <section class="panel" aria-labelledby="growth-history-heading">
+                <div class="section-heading-row">
+                  <div>
+                    <p class="section-kicker">家庭历史</p>
+                    <h2 id="growth-history-heading">成长记录</h2>
+                  </div>
+                  <span id="growth-count" class="tag">正在读取</span>
+                </div>
+                <div id="growth-history" class="growth-history"></div>
+                <details id="growth-trash">
+                  <summary>最近删除的成长记录</summary>
+                  <div id="growth-trash-list" class="stack" aria-live="polite"></div>
+                </details>
+              </section>
+
+              <aside class="growth-side">
+                <section class="panel" aria-labelledby="growth-add-heading">
+                  <p class="section-kicker">新增事实</p>
+                  <h2 id="growth-add-heading">记下一件小事</h2>
+                  <div id="growth-form" class="stack"></div>
+                </section>
+
+                <section id="books-panel" class="panel" aria-labelledby="books-heading">
+                  <div class="section-heading-row">
+                    <div>
+                      <p class="section-kicker">家里的书</p>
+                      <h2 id="books-heading">书架</h2>
+                    </div>
+                    <span class="tag">只显示已登记项</span>
+                  </div>
+                  <div id="books-list" class="stack"></div>
+                  <details class="connection-settings">
+                    <summary>登记一本家里的书</summary>
+                    <form id="book-form" class="stack" novalidate>
+                      <div class="field">
+                        <label for="book-title">书名</label>
+                        <input id="book-title" maxlength="100" required>
+                      </div>
+                      <div class="field">
+                        <label for="book-language">语言</label>
+                        <input id="book-language" maxlength="60" value="中文" required>
+                      </div>
+                      <div class="field">
+                        <label for="book-note">家中备注（可选）</label>
+                        <textarea id="book-note" maxlength="2000" rows="2"></textarea>
+                      </div>
+                      <p class="field-hint">没有核对版本时只登记书名，不承诺页码、点读功能或具体版本。</p>
+                      <p id="book-form-error" class="form-alert" role="alert" hidden></p>
+                      <button id="book-submit" class="button button-primary" type="submit">登记到书架</button>
+                    </form>
+                  </details>
+                </section>
+
+                <section class="panel" aria-labelledby="export-heading">
+                  <p class="section-kicker">数据带走</p>
+                  <h2 id="export-heading">导出家庭记录</h2>
+                  <form id="export-form" class="stack" novalidate>
+                    <div class="form-row">
+                      <div class="field">
+                        <label for="export-from">开始日期</label>
+                        <input id="export-from" type="date" required>
+                      </div>
+                      <div class="field">
+                        <label for="export-to">结束日期</label>
+                        <input id="export-to" type="date" required>
+                      </div>
+                    </div>
+                    <fieldset class="field">
+                      <legend>导出内容</legend>
+                      <div class="choice-row">
+                        <label class="choice-pill"><input type="checkbox" name="export-types" value="memories" checked>成长小记</label>
+                        <label class="choice-pill"><input type="checkbox" name="export-types" value="measurements" checked>测量</label>
+                        <label class="choice-pill"><input type="checkbox" name="export-types" value="sessions" checked>活动记录</label>
+                        <label class="choice-pill"><input type="checkbox" name="export-types" value="plans" checked>陪伴安排</label>
+                      </div>
+                    </fieldset>
+                    <label class="check-row"><input id="export-media" type="checkbox">同时打包照片（需要服务端媒体功能）</label>
+                    <p id="export-form-error" class="form-alert" role="alert" hidden></p>
+                    <button id="export-submit" class="button button-primary" type="submit">申请导出</button>
+                  </form>
+                  <div id="export-result" class="stack" hidden></div>
+                </section>
+              </aside>
+            </div>
+          </section>
+
+          <section id="view-content" class="view" aria-labelledby="content-heading" hidden>
+            <div class="page-title-row">
+              <div>
+                <p class="eyebrow">内容维护</p>
+                <h1 id="content-heading">内容和发布工作台</h1>
+                <p class="page-subtitle">这里只向内容角色开放。审核状态、证据与发布版本都由服务端事实决定。</p>
+              </div>
+              <button id="refresh-content-button" class="button button-quiet" type="button">刷新</button>
+            </div>
+            <div id="content-status" class="inline-alert" role="status" aria-live="polite" hidden></div>
+            <div class="content-summary">
+              <section class="panel">
+                <p class="section-kicker">我的内容角色</p>
+                <h2 id="content-roles">尚未读取</h2>
+                <p id="content-role-note" class="muted"></p>
+              </section>
+              <section class="panel">
+                <p class="section-kicker">发布门禁</p>
+                <h2 id="publish-gate-title">等待审核数据</h2>
+                <p id="publish-gate-note" class="muted">未通过审核、缺少证据或自审标记不合规时，页面不会显示为可发布。</p>
+                <div id="publish-gate-actions" class="growth-entry-actions"></div>
+              </section>
+            </div>
+            <div class="content-grid">
+              <section class="panel" aria-labelledby="revisions-heading">
+                <div class="section-heading-row">
+                  <div>
+                    <p class="section-kicker">修订队列</p>
+                    <h2 id="revisions-heading">内容修订</h2>
+                  </div>
+                  <span id="revision-count" class="tag">正在读取</span>
+                </div>
+                <div id="content-creator" class="stack"></div>
+                <div id="content-revisions" class="stack"></div>
+              </section>
+              <section class="panel" aria-labelledby="releases-heading">
+                <div class="section-heading-row">
+                  <div>
+                    <p class="section-kicker">不可变历史</p>
+                    <h2 id="releases-heading">发布版本</h2>
+                  </div>
+                  <span id="release-count" class="tag">正在读取</span>
+                </div>
+                <div id="content-releases" class="stack"></div>
+              </section>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <section id="print-root" class="print-root" aria-hidden="true"></section>
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

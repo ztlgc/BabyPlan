@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <title>BabyPlan · 网页家长区低保真原型 W01—W08</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="../mobile/fixture.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#screen">跳到家长区内容</a>
+  <header class="site-head">
+    <div class="site-brand">
+      <strong>BabyPlan</strong>
+      <span>网页家长区 · W01—W08</span>
+    </div>
+    <p class="site-note">低保真 / 虚构数据 / 本地模拟 · 扩展原型（未合同化）</p>
+  </header>
+
+  <div class="app-shell">
+    <div class="product" aria-label="家长区原型">
+      <p class="demo-note">刷新即重置；保存、同步、上传与打印都是页面内模拟，不写入真实家庭数据。</p>
+      <header class="app-head">
+        <div class="brand-line">
+          <button class="brand" type="button" data-action="nav" data-route="w02">BabyPlan 家长区</button>
+          <div id="header-status" class="header-status" aria-label="家庭与当前成员"></div>
+        </div>
+        <nav id="primary-nav" class="primary-nav" aria-label="网页家长区页面"></nav>
+      </header>
+      <main id="screen" tabindex="-1"></main>
+      <footer class="app-footer">
+        <p>扩展原型（未合同化） · 固定时钟 2026-11-11（周三）15:00 Asia/Shanghai · 不发送网络请求</p>
+      </footer>
+    </div>
+
+    <aside class="review" aria-label="设计审阅工具">
+      <details id="review-details" open>
+        <summary>设计审阅面板 <span>不属于产品界面</span></summary>
+        <div class="review-body">
+          <p class="eyebrow">扩展原型（未合同化）</p>
+          <h2>先看流程，再看样式</h2>
+          <p>从连接页进入今天，打开一项内容，记录或调整；再查看阶段、书架、成长与打印选择。</p>
+
+          <label for="review-scenario">虚构场景</label>
+          <select id="review-scenario"><option value="expanded_parent_web">家长网页 · 初始空记录</option><option value="expanded_print">打印 · 选中一项安排</option><option value="expanded_media_pending">照片待上传</option><option value="expanded_media_failure">照片上传失败</option><option value="extra_growth">额外虚构成长样本（含第一次/原话/测量）</option><option value="expanded_memory_empty">成长空状态</option></select>
+          <p class="note">额外成长样本仅在显式选择后出现，不把未保存草稿当成已保存记录。</p>
+          <label for="review-connection">家庭连接</label>
+          <select id="review-connection">
+            <option value="connected">已连接（模拟）</option>
+            <option value="connecting">连接中（模拟）</option>
+            <option value="expired">连接已失效</option>
+            <option value="failed">连接失败</option>
+            <option value="not_joined">账号未加入家庭</option>
+          </select>
+
+          <label for="review-today">今天内容状态</label>
+          <select id="review-today">
+            <option value="ready">正常</option>
+            <option value="loading">加载中</option>
+            <option value="failed">加载失败</option>
+            <option value="empty">空安排</option>
+          </select>
+
+          <div class="review-pair">
+            <label for="review-member">虚构成员</label>
+            <select id="review-member"></select>
+            <label for="review-theme">主题</label>
+            <select id="review-theme">
+              <option value="light">浅色灰阶</option>
+              <option value="dark">深色灰阶</option>
+            </select>
+            <label for="review-font">字号</label>
+            <select id="review-font">
+              <option value="1">100%</option>
+              <option value="2">200%</option>
+            </select>
+          </div>
+
+          <label class="check"><input type="checkbox" id="review-network"> 断网（模拟）</label>
+          <label class="check"><input type="checkbox" id="review-conflict"> 记录冲突（双方可比较）</label>
+          <label class="check"><input type="checkbox" id="review-readonly"> 只读权限</label>
+          <label class="check"><input type="checkbox" id="review-failure"> 下一次操作失败</label>
+
+          <div class="review-actions">
+            <button type="button" class="button primary" data-action="reset-demo">重置全部演示</button>
+          </div>
+
+          <dl class="review-meta">
+            <div><dt>当前页面</dt><dd id="review-page-code">W01</dd></div>
+            <div><dt>固定时钟</dt><dd id="review-clock">2026-11-11（周三）15:00 · Asia/Shanghai</dd></div>
+            <div><dt>当前状态</dt><dd id="review-state-summary"></dd></div>
+          </dl>
+
+          <p class="note">切换成员、场景或网络后，已经生成的打印预览会失效，必须按当前选择重新生成。</p>
+          <p class="note">所有保存、上传、同步、打印和权限都只改当前页面内存。通知、真实身份、SQLite、跨设备同步与正式打印均未实现。</p>
+          <p class="note">家长区不包含内容管理区的发布、审核或撤回操作。</p>
+        </div>
+      </details>
+    </aside>
+  </div>
+
+  <dialog id="modal" aria-labelledby="modal-title"></dialog>
+  <div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
+</body>
+</html>

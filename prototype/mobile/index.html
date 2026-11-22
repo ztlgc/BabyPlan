@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <title>BabyPlan · 安卓低保真原型</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="fixture.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#screen">跳到应用内容</a>
+  <header class="workspace-head"><div><strong>BabyPlan</strong><span>安卓交互草图 · 01</span></div><span>低保真 / 虚构数据 / 本地模拟</span></header>
+  <div class="workspace">
+    <section class="device" aria-label="安卓原型画布">
+      <div class="demo-label">交互原型 · 刷新即重置，不会写入真实数据</div>
+      <header id="app-header" class="app-header"></header>
+      <main id="screen" tabindex="-1"></main>
+      <nav id="app-nav" aria-label="主要导航"></nav>
+    </section>
+    <aside class="review" aria-label="设计审阅工具">
+      <details id="review-details" open>
+        <summary>设计审阅面板 <span>不属于产品界面</span></summary>
+        <div class="review-content">
+          <p class="eyebrow">本轮 · 安卓 N01—N12</p>
+          <h2>先看流程，再看样式</h2>
+          <p>先从今天打开一项活动，记录后返回；再切换成员，检查共享记录和异常恢复。</p>
+          <label for="scenario">切换演示场景</label><select id="scenario"></select>
+          <p id="scenario-expectation" class="note"></p>
+          <label for="member">当前添加者（虚构账号）</label><select id="member"></select>
+          <div class="review-toggles"><label for="theme">主题</label><select id="theme"><option value="light">浅色灰阶</option><option value="dark">深色灰阶</option></select><label for="font-scale">字号</label><select id="font-scale"><option value="1">100%</option><option value="2">200%</option></select></div>
+          <label class="check"><input type="checkbox" id="save-failure">下一次保存失败（模拟）</label>
+          <div class="stack-actions"><button data-action="open-sync">查看同步与冲突</button><button data-action="reset">重置全部演示</button></div>
+          <dl class="review-meta"><div><dt>当前页面</dt><dd id="page-code">N02</dd></div><div><dt>家庭时钟</dt><dd id="clock-label"></dd></div><div><dt>网络场景</dt><dd id="network-label"></dd></div></dl>
+          <p class="note">灰阶用于评审层级；三段、导航、记录粒度均为候选。通知、上传、身份、SQLite和跨设备同步都未实现。</p>
+          <p class="note">本轮只做安卓。网页家长区与内容管理区不在这版原型中。</p>
+        </div>
+      </details>
+    </aside>
+  </div>
+  <dialog id="sheet" aria-labelledby="sheet-title"></dialog>
+  <div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
+</body>
+</html>

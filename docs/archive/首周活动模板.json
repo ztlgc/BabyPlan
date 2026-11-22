@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "templateId": "family_play_18m_week_01",
+  "title": "跟着宝宝边玩边说",
+  "intendedAgeMonths": 18,
+  "lengthDays": 7,
+  "suggestedReminderTime": "19:30",
+  "suggestedMinutesPerActivity": 5,
+  "parentGuidance": "大人陪在身边，用适龄、没有松脱小零件的物品。等宝宝看、指、发声或行动，再接着回应。玩一小会儿也算，宝宝想停就停。没有书时，也可以拿干净毛巾等熟悉物品，一起看一看、说一说。",
+  "sources": {
+    "nhc": "https://www.nhc.gov.cn/fys/c100078/202502/19c9c6dee0274d23822f313a99ae1779/files/1741749469666_88130.pdf",
+    "cdc": "https://www.cdc.gov/act-early/milestones/18-months.html",
+    "unicef": "https://www.unicef.org/parenting/child-care/21-learning-activities-babies-and-toddlers"
+  },
+  "days": [
+    {
+      "dayNumber": 1,
+      "activityId": "picture_talk",
+      "title": "看图说说",
+      "materials": "布书或硬页书",
+      "instruction": "宝宝看哪里，你就说哪里。说完停一停，等宝宝看、指或发声；有反应就接一句。",
+      "say": "狗狗，汪汪。",
+      "sourceIds": ["nhc", "cdc"]
+    },
+    {
+      "dayNumber": 2,
+      "activityId": "roll_ball",
+      "title": "一起滚球",
+      "materials": "大软球，平坦清空的地板",
+      "instruction": "面对面坐下来，慢慢把球滚过去，等宝宝碰一碰或推一推。",
+      "say": "球来啦。",
+      "sourceIds": ["cdc"]
+    },
+    {
+      "dayNumber": 3,
+      "activityId": "in_and_out",
+      "title": "放进去，拿出来",
+      "materials": "干净的卷袜和敞口矮篮子",
+      "instruction": "先演示把袜子放进篮子、再拿出来。让宝宝决定要不要跟着做。",
+      "say": "进去，出来。",
+      "sourceIds": ["unicef", "cdc"]
+    },
+    {
+      "dayNumber": 4,
+      "activityId": "picture_talk",
+      "title": "再看一页",
+      "materials": "第 1 天的书",
+      "instruction": "让宝宝翻到想看的那页，顺着他看的图加一句短话。",
+      "say": "狗狗在跑。",
+      "sourceIds": ["nhc", "cdc"]
+    },
+    {
+      "dayNumber": 5,
+      "activityId": "pretend_sleep",
+      "title": "哄玩偶睡觉",
+      "materials": "没有松脱零件的软玩偶",
+      "instruction": "抱着玩偶轻轻摇一下，再看看宝宝想抱抱、拍拍还是只看你做。",
+      "say": "睡觉啦。",
+      "sourceIds": ["nhc", "unicef"]
+    },
+    {
+      "dayNumber": 6,
+      "activityId": "roll_ball",
+      "title": "再滚一次球",
+      "materials": "第 2 天的软球，平坦清空的地板",
+      "instruction": "把球放到宝宝手边，等他先碰，再接着把球滚回去。",
+      "say": "我们再玩一次。",
+      "sourceIds": ["cdc"]
+    },
+    {
+      "dayNumber": 7,
+      "activityId": "picture_talk",
+      "title": "让宝宝选一页",
+      "materials": "同一本布书或硬页书",
+      "instruction": "让宝宝翻一页或指一指，你跟着说一两句。",
+      "say": "你在看小狗呀。",
+      "sourceIds": ["nhc", "cdc"]
+    }
+  ]
+}

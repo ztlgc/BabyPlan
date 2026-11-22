@@ -1,0 +1,56 @@
+{
+  "url": "http://192.168.5.196:4174/",
+  "samples": [
+    {
+      "ageMonths": 12,
+      "day": 1,
+      "title": "第 1 天 · 小手拍拍",
+      "content": {
+        "count": 389,
+        "daily": 365
+      }
+    },
+    {
+      "ageMonths": 18,
+      "day": 183,
+      "title": "第 183 天 · 大球轮到你",
+      "content": {
+        "count": 389,
+        "daily": 365
+      }
+    },
+    {
+      "ageMonths": 23,
+      "day": 365,
+      "title": "第 365 天 · 这件事我们一起做过",
+      "content": {
+        "count": 389,
+        "daily": 365
+      }
+    }
+  ],
+  "pageErrors": [],
+  "narrowScreen": "360px and 200% text passed",
+  "verifiedOn": "2026-11-14",
+  "activePackage": "babyplan-daily-12-24",
+  "contentVersion": 1,
+  "releaseVersion": 2,
+  "contentEnvironment": "development",
+  "cardCount": 389,
+  "dailyCardCount": 365,
+  "fixtureCleanup": {
+    "familiesRemoved": 3,
+    "fixtureUsersRemaining": 0
+  },
+  "services": {
+    "api": "healthy",
+    "web": "healthy",
+    "db": "healthy"
+  },
+  "validation": {
+    "apiPassed": 13,
+    "apiSkipped": 2,
+    "webPassed": 30,
+    "contentValidatorPassed": 40
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "@babyplan/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "BabyPlan 家长网页静态入口",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test"
+  }
+}

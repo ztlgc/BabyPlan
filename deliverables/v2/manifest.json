@@ -1,0 +1,761 @@
+{
+  "version": "2.0-design",
+  "createdOn": "2026-11-13",
+  "files": [
+    {
+      "path": "content/candidate/babyplan-18-23-v2.json",
+      "bytes": 49140,
+      "sha256": "b46178e67cad767513fada2f8a20a63934999e6faf6d7bf0ad9df6f5f859c2d6"
+    },
+    {
+      "path": "content/demo/demo-content-package.json",
+      "bytes": 4869,
+      "sha256": "13a409175bcd183ad72b42c3c15e71fe06ab269ac460f5ed3fa767ca991091e8"
+    },
+    {
+      "path": "content/design/design-scenarios.json",
+      "bytes": 25875,
+      "sha256": "7f0771bdb062457f857e37c250966581bcc5bf4ab0a3294984c871da0664e7c5"
+    },
+    {
+      "path": "content/design/expanded-prototype.json",
+      "bytes": 30995,
+      "sha256": "fee8a5851fb576caecf051f95f99b7d1e4ea4df8e613db0710b93d53c969114b"
+    },
+    {
+      "path": "content/README.md",
+      "bytes": 2279,
+      "sha256": "9641b4eb0966b033bbbcfd435cc04b20aa13322ed35398bcde9e13b9a626de51"
+    },
+    {
+      "path": "contracts/content-package.schema.json",
+      "bytes": 5384,
+      "sha256": "421d5abda5f56325eb58f2aa7571eed64ca627d41936fec10bb5428dcdcd0c70"
+    },
+    {
+      "path": "contracts/openapi.yaml",
+      "bytes": 38733,
+      "sha256": "0538e5e19b2026ab28d654dbac36101cff1ae4e8e81bf7ec591c11d3da9dee77"
+    },
+    {
+      "path": "contracts/v2/content-package.schema.json",
+      "bytes": 16101,
+      "sha256": "8692691e8d09a37a09369ec28e35ed6cd0cc93881557d8d0ba9cabe5a5c9c2ca"
+    },
+    {
+      "path": "contracts/v2/openapi.yaml",
+      "bytes": 85236,
+      "sha256": "292c5252dab4416832c0810e64148601159250e063c9bf4bfbf257146e9df1fd"
+    },
+    {
+      "path": "contracts/v2/README.md",
+      "bytes": 1884,
+      "sha256": "b488b3d2336fe231e75c310f0629458f7a93bb7d1853dfd80194bc9bf4380563"
+    },
+    {
+      "path": "deliverables/BabyPlan-手机应用效果图.png",
+      "bytes": 275634,
+      "sha256": "b5261fb7ff9c5f128493cc2cc9dc9d645b03ef1b19bda14b62782690de3c0b32"
+    },
+    {
+      "path": "deliverables/BabyPlan-网页前端效果图.png",
+      "bytes": 267036,
+      "sha256": "2a8a4076d853fe8636d889635c2f445bf56efb6298ca7c2d22550283235d2158"
+    },
+    {
+      "path": "deliverables/BabyPlan-网页后台效果图.png",
+      "bytes": 304584,
+      "sha256": "426a1199f683aee1b04c35acb7a743d29b2228cecaee8b45abfc9c75b970fc6a"
+    },
+    {
+      "path": "deliverables/BabyPlan-网页端效果图.png",
+      "bytes": 340171,
+      "sha256": "225f2358b469262a958d12d599913de8eb707ad7ec308eedecfa825ca56495e9"
+    },
+    {
+      "path": "deliverables/prototype-screens/admin/C01-角色与连接.png",
+      "bytes": 187650,
+      "sha256": "f315fc567bba3104dd39bb024cc6beb1e8822a75803f928d926fc6eb5585a56b"
+    },
+    {
+      "path": "deliverables/prototype-screens/admin/C02-内容库.png",
+      "bytes": 232764,
+      "sha256": "da6a25db5667e62088eb6c7cb1daa019b7b5cd899e6bf2dd684dad986b8d6a4a"
+    },
+    {
+      "path": "deliverables/prototype-screens/admin/C03-草稿编辑.png",
+      "bytes": 364417,
+      "sha256": "6f9d3cba32eecb297283b9fa5983a0f3be615612a354182cbc3c7d3f3885deb7"
+    },
+    {
+      "path": "deliverables/prototype-screens/admin/C04-审核.png",
+      "bytes": 389360,
+      "sha256": "cff6772d293af1be07d2ee72329b8549c204809820125a72b2994f9464bd26f2"
+    },
+    {
+      "path": "deliverables/prototype-screens/admin/C05-发布.png",
+      "bytes": 222748,
+      "sha256": "bec39babab55631712f415d0d64ee46d48015442553123e886fd78942154fabf"
+    },
+    {
+      "path": "deliverables/prototype-screens/admin/C06-版本与撤回.png",
+      "bytes": 155034,
+      "sha256": "f5a1db547eb46957e782e6515419bff73222a4c331f83bced98c316b7741a813"
+    },
+    {
+      "path": "deliverables/prototype-screens/index.html",
+      "bytes": 9162,
+      "sha256": "1047323c876b4fe63867a1bc0d619ceedf24cd7eee41ca5ee919a170ad828b88"
+    },
+    {
+      "path": "deliverables/prototype-screens/manifest.json",
+      "bytes": 5661,
+      "sha256": "98f5760b027f6a96e0fdd1778dda5417f755de2dd1fbfdc14ef1b6be7f32e2e9"
+    },
+    {
+      "path": "deliverables/prototype-screens/mobile/N01-家庭连接.png",
+      "bytes": 115694,
+      "sha256": "5c4ef8366a8870af6de80ab95c79cca9b0a1c4ae9dbf4be69b84b487cbf9b3c7"
+    },
+    {
+      "path": "deliverables/prototype-screens/mobile/N02-今天.png",
+      "bytes": 348828,
+      "sha256": "f8b12df2a33d09d23b6af925a78d4313868634aca5a220176ecd98e1a6d7cfef"
+    },
+    {
+      "path": "deliverables/prototype-screens/mobile/N03-活动详情.png",
+      "bytes": 210951,
+      "sha256": "0bd074afd567c5e0b432a9e52b7253118e8330b107300a84015b8cce55aa8e5d"
+    },
+    {
+      "path": "deliverables/prototype-screens/mobile/N04-记录与同步.png",
+      "bytes": 104933,
+      "sha256": "bf0b8616e5cfb1b16a31009d8dca6205e62ced87d5d133a5e6637f1e445ddc75"
+    },
+    {
+      "path": "deliverables/prototype-screens/mobile/N05-换活动.png",
+      "bytes": 109215,
+      "sha256": "7e1f91c2d78a35831b8975f31ec3b2849806181c51432fcc0788814321623486"
+    },
+    {
+      "path": "deliverables/prototype-screens/mobile/N06-书架与活动.png",
+      "bytes": 238765,
+      "sha256": "9bffd6a8beebcc259ca53e649b6116e4e98c495cb2de5348370802383c7b1c02"
+    },
+    {
+      "path": "deliverables/prototype-screens/mobile/N07-阶段指引.png",
+      "bytes": 167628,
+      "sha256": "02b257560b14ff9fbece15fda824f73dc316da175aa86313180091fae1eec6d9"
+    },
+    {
+      "path": "deliverables/prototype-screens/mobile/N08-阶段支持示例.png",
+      "bytes": 183816,
+      "sha256": "437def332e4d14c84b3f972a02bfd03399b0b9ace1b1a7bcf0dd0726b571341e"
+    },
+    {
+      "path": "deliverables/prototype-screens/mobile/N09-成长.png",
+      "bytes": 119308,
+      "sha256": "7ded913e6addc029fa0239092c35a2568e980102f199f0d1f83a138528ace7cf"
+    },
+    {
+      "path": "deliverables/prototype-screens/mobile/N10-成长记录表单.png",
+      "bytes": 72153,
+      "sha256": "4b38c761439d84cd3660ed4a135b0c47a089a03cac989033f68df1e481975983"
+    },
+    {
+      "path": "deliverables/prototype-screens/mobile/N11-测量记录.png",
+      "bytes": 118201,
+      "sha256": "43cda97cd545e855a1f01295ab0cd56a906a6cb090ffd3f77d623a471ca9b184"
+    },
+    {
+      "path": "deliverables/prototype-screens/mobile/N12-家庭设置.png",
+      "bytes": 175635,
+      "sha256": "5daaf529d3073f615f11ac95abb74903e15e6c34a190300edb2011dc6a66fa89"
+    },
+    {
+      "path": "deliverables/prototype-screens/parent/W01-连接与家庭选择.png",
+      "bytes": 272596,
+      "sha256": "d787ac74d257db2798aaf3cceb3ad9902dd853f60f336d4bd17a72bb6330322e"
+    },
+    {
+      "path": "deliverables/prototype-screens/parent/W02-今天与本周.png",
+      "bytes": 685670,
+      "sha256": "1e1e7db05992425bbd05105a8e2d78999962092879f975cb9cba4cb10d0078b6"
+    },
+    {
+      "path": "deliverables/prototype-screens/parent/W03-安排查看与调整.png",
+      "bytes": 945635,
+      "sha256": "1ab07de3fa329c32692f0b7610236ace2275062e478ce3a0dcbec375bda09df7"
+    },
+    {
+      "path": "deliverables/prototype-screens/parent/W04-阶段路线.png",
+      "bytes": 375553,
+      "sha256": "0624af8dc55727ef9acc0baac65fba26ce1c5ecfae5e6944359d758cc8abf4c0"
+    },
+    {
+      "path": "deliverables/prototype-screens/parent/W05-书架整理.png",
+      "bytes": 215038,
+      "sha256": "55c6e6afc378ffb2fcd7563765eaf811a7b73602d7f7d835664fd5d23e86544a"
+    },
+    {
+      "path": "deliverables/prototype-screens/parent/W06-成长档案.png",
+      "bytes": 221369,
+      "sha256": "f6c6f0e2ef4cc82d50af347769f5716bbd44f34fdfae75f881e5052ad3c3bb63"
+    },
+    {
+      "path": "deliverables/prototype-screens/parent/W07-打印与导出.png",
+      "bytes": 297964,
+      "sha256": "6bb8db0a66c93ef273cac9adc3b580d43d32e08058c5644735f2730992fdc42d"
+    },
+    {
+      "path": "deliverables/prototype-screens/parent/W08-家庭与成员设置.png",
+      "bytes": 362821,
+      "sha256": "da81b2034e7c298f86870acddf474462d5a109f940a091f31f0be8ee52e538d4"
+    },
+    {
+      "path": "deliverables/prototype-screens/索引.md",
+      "bytes": 2170,
+      "sha256": "8bc667b1631f65cd93182d860087538eef8eec0a778eb2ef74ee116c51636a4f"
+    },
+    {
+      "path": "deliverables/README.md",
+      "bytes": 2299,
+      "sha256": "10a942d9b06a3aed7a7463f221234b00725efac361ab738af11aa4da58e6ed71"
+    },
+    {
+      "path": "deliverables/v2/browser-check.json",
+      "bytes": 4667,
+      "sha256": "9f16d54d435c4b2e26c3ce26725c5259ef2d857c2bc58676a31c9e68227da5ee"
+    },
+    {
+      "path": "deliverables/v2/delivery-check.json",
+      "bytes": 227,
+      "sha256": "5745d14f7f9ea3051bec29ce911b22e15bff6172e5ded1f9a86cee6314d2f2be"
+    },
+    {
+      "path": "deliverables/v2/development-plan-check.json",
+      "bytes": 460,
+      "sha256": "775a74bb953c65d513cafeb80e81764462bc9c273ed7884551e1bfb9fb88e2e8"
+    },
+    {
+      "path": "deliverables/v2/link-check.json",
+      "bytes": 78,
+      "sha256": "594ec03d5261f5fa75355d13f83d5edf3544b29c3cf40206e2f166a3d973c02f"
+    },
+    {
+      "path": "deliverables/v2/README.md",
+      "bytes": 1284,
+      "sha256": "5aedfefeff567fc8bb846292a33f597c503256ab6f26b4ca5c7406f9f1a90ce7"
+    },
+    {
+      "path": "deliverables/v2/screens/admin-editor.png",
+      "bytes": 106533,
+      "sha256": "0b0ce4db6211c15cc3840fc4cdecc896b7d6a0fa29ca76e01126352bf9075dcb"
+    },
+    {
+      "path": "deliverables/v2/screens/admin-library.png",
+      "bytes": 96549,
+      "sha256": "2e801f5f687610d5c798e184d03ce6ca9abb778a6a80778ca3113cb66e9ebac1"
+    },
+    {
+      "path": "deliverables/v2/screens/admin-releases.png",
+      "bytes": 87772,
+      "sha256": "39bb42c055e06092058f72eb86a5bc183a8fda5730524a8385de719bce7f6b7d"
+    },
+    {
+      "path": "deliverables/v2/screens/admin-review.png",
+      "bytes": 88186,
+      "sha256": "06e0ca783f1f528934f8b3ec760f7dda36287cd23fca293b3eeaf6c12d38120c"
+    },
+    {
+      "path": "deliverables/v2/screens/mobile-detail.png",
+      "bytes": 51070,
+      "sha256": "0c934bbd7256e87bdebf07d5592b0b3285d270dcf09ac8a2fa4064680e733d64"
+    },
+    {
+      "path": "deliverables/v2/screens/mobile-discover.png",
+      "bytes": 53990,
+      "sha256": "1eddb487f1e6283864f6d935c6189cd3f8c40ad5de401e216bb6a013ff586708"
+    },
+    {
+      "path": "deliverables/v2/screens/mobile-growth.png",
+      "bytes": 47941,
+      "sha256": "758038406a6429dfac913a9f229d0eeb3c158ab335efe94cbb693ee9bbbbc5a4"
+    },
+    {
+      "path": "deliverables/v2/screens/mobile-large-dark.png",
+      "bytes": 72322,
+      "sha256": "2e224c51ee594f9e3c2584c30c78d110701491f8a2ded29f6d9243ef8f1bd54c"
+    },
+    {
+      "path": "deliverables/v2/screens/mobile-measurements.png",
+      "bytes": 36298,
+      "sha256": "168dc91fd7c471994bc7d3dee09806afe3f752598d335e60db05aea876df6dcd"
+    },
+    {
+      "path": "deliverables/v2/screens/mobile-record.png",
+      "bytes": 41905,
+      "sha256": "ca65c8e0967455b8117035f517bac999e635d10f392e195652882bee234465bb"
+    },
+    {
+      "path": "deliverables/v2/screens/mobile-settings.png",
+      "bytes": 42314,
+      "sha256": "6c87bbf8fe48e0a359c090256998799d297afddacaf1a453d324bad66519fd6e"
+    },
+    {
+      "path": "deliverables/v2/screens/mobile-stage.png",
+      "bytes": 54515,
+      "sha256": "2b004e8ef65dd6d9e977cef6ca86b8167c36faab4b20e5c455091b276be943e7"
+    },
+    {
+      "path": "deliverables/v2/screens/mobile-start.png",
+      "bytes": 48949,
+      "sha256": "45141ca63de46f7ea8cabb7b66a73668615cc39ea6fe70bff1f79f9bd5468aa3"
+    },
+    {
+      "path": "deliverables/v2/screens/mobile-today.png",
+      "bytes": 55011,
+      "sha256": "9e6d9a340eb8cef7a9d5988f612ac6824a44328c0899b0e0d5f36075fcfaeb9d"
+    },
+    {
+      "path": "deliverables/v2/screens/mobile-week.png",
+      "bytes": 49105,
+      "sha256": "ab28074d7279c7a0ea31a7ade436528e84561d7babc68ce9dbcac036cdf33167"
+    },
+    {
+      "path": "deliverables/v2/screens/parent-books.png",
+      "bytes": 85405,
+      "sha256": "28b0bc5ff8f57b0de8bfb7759a2eb5c9bf19cbf04058c017761cae45da0d571e"
+    },
+    {
+      "path": "deliverables/v2/screens/parent-today.png",
+      "bytes": 119595,
+      "sha256": "607cb6f8a0c2783b36ac3c233e244aa0252b37b385d6b0585c1008a89fc15942"
+    },
+    {
+      "path": "deliverables/v2/screens/parent-week.png",
+      "bytes": 126406,
+      "sha256": "308af5bc7903c97a1abff9402b765b340daa58af241ab30a3d107d2c43e6c7a2"
+    },
+    {
+      "path": "deliverables/v2/structure-check.json",
+      "bytes": 2403,
+      "sha256": "d98e98abe2fb79795193eb5018871edad39c0c6d88a77e5b5648d96faa55bfdc"
+    },
+    {
+      "path": "deliverables/v2/开发计划.html",
+      "bytes": 38939,
+      "sha256": "3d18800b6bb9261b79c71dbe9a276d84946a7ee58a48d05c73d13ac4a7a0cb67"
+    },
+    {
+      "path": "deliverables/v2/开发计划任务预览.png",
+      "bytes": 45514,
+      "sha256": "0caa4916acdde840add318081ca9f59ca3c2b55176b7f02cf3aa5f2881eba34c"
+    },
+    {
+      "path": "deliverables/v2/开发计划预览.png",
+      "bytes": 94192,
+      "sha256": "39cae984e464175aeefbd2d9671eb8835e0f4ffd333d730012b6e8181309853c"
+    },
+    {
+      "path": "deliverables/v2/活动手册.html",
+      "bytes": 45335,
+      "sha256": "8ae075b187747699d52450854a16df30a25d21430102ce6a19870eea21bb7628"
+    },
+    {
+      "path": "deliverables/v2/活动手册预览.png",
+      "bytes": 101424,
+      "sha256": "f13cb274b01034fe29bb5d4e41145761efe6427e174a23dc9ca571c8db525272"
+    },
+    {
+      "path": "deliverables/v2/界面总览.html",
+      "bytes": 1943,
+      "sha256": "a9ce172c96c310c6f0b62e9b43fead90bda6623f43d1d8f1ac60e03bbf92650d"
+    },
+    {
+      "path": "deliverables/v2/界面总览.png",
+      "bytes": 283299,
+      "sha256": "11dd6e88e8c6fd972b6a71ab02b5b3d8eebb71f14dbd7ae9a18bd7d880cc5643"
+    },
+    {
+      "path": "deliverables/v2/设计总览入口.png",
+      "bytes": 133800,
+      "sha256": "41e3e7af8933894145696c7fe923abc5742109fea9adb365efd25a8a6f1935ec"
+    },
+    {
+      "path": "deliverables/设计交接包校验报告.md",
+      "bytes": 3232,
+      "sha256": "cfa5aee6bf7c29a392da3fcdc81e1fe2f4f609fd0126afb3e06e692d95a9932f"
+    },
+    {
+      "path": "docs/00-项目启动指南.md",
+      "bytes": 8135,
+      "sha256": "03a411350318d9c0afb60e0806e5ad89d88d94a3fbb420a2c10e084bcfd8e3f1"
+    },
+    {
+      "path": "docs/01-文档梳理与决策记录.md",
+      "bytes": 10926,
+      "sha256": "b981595257d30ae2425a3c33aff06a930eb8435e1e8203b67590af440d0c94b8"
+    },
+    {
+      "path": "docs/archive/README-v1-原始入口.md",
+      "bytes": 5527,
+      "sha256": "f1ad519dc89d94954e28cc9219fff2876f007294b696b75368a11720e6eadaae"
+    },
+    {
+      "path": "docs/archive/首周活动模板.json",
+      "bytes": 3109,
+      "sha256": "90f746921c80c52982f61091b26a04bfd3c772cabbc60b0bcb4d3529aad5f8f6"
+    },
+    {
+      "path": "docs/archive/首版开工方案.md",
+      "bytes": 6085,
+      "sha256": "e970a6d60d44726f7557fcc289edc3999ab1751899e962d7d6cedf97b4e9b061"
+    },
+    {
+      "path": "docs/BabyPlan-产品与三端架构讨论稿.md",
+      "bytes": 15628,
+      "sha256": "e7c10ff50595b077bb8dfe90afdad0d7caa9f7720aba133f4cab2708152afdc8"
+    },
+    {
+      "path": "docs/BabyPlan-儿童内容与书目研究笔记-2026-11-11.md",
+      "bytes": 32008,
+      "sha256": "dfb38ed15a97075c21204ee3f36b28a79eac017840fc8fa2af172c3b9d1f28a5"
+    },
+    {
+      "path": "docs/content/18月龄内容清单.md",
+      "bytes": 11807,
+      "sha256": "8ba789ece39c0c427c8fcf4543f1ebf38cf33970e3c3f4a67e3a1dca9eaba37b"
+    },
+    {
+      "path": "docs/design/01-安卓设计简报.md",
+      "bytes": 7311,
+      "sha256": "285c9bc1c51b46924c1d55a9c7d8d3c6b3815669e25b3e899f9baf8b57ea954e"
+    },
+    {
+      "path": "docs/design/02-服务端设计简报.md",
+      "bytes": 5164,
+      "sha256": "ba274f706d467d057e0ef5ce205f8307ff67a7de93e083bb16765120da704941"
+    },
+    {
+      "path": "docs/design/03-原型状态与文案清单.md",
+      "bytes": 75935,
+      "sha256": "cdada33830f3920200c035033d12a3e36cf910486209e11a5778f91560be3322"
+    },
+    {
+      "path": "docs/design/04-视觉与组件基线.md",
+      "bytes": 6983,
+      "sha256": "3f4c977f2bd1b47cc0de58e1e8cf3f162cc2164d9f01726b8b4a8d614536c4d4"
+    },
+    {
+      "path": "docs/design/05-原型范围与三端简报.md",
+      "bytes": 9627,
+      "sha256": "e75b7f65418c9db8e3fd2d04c589bb67420e603f350940eaa7f47687b9de9a55"
+    },
+    {
+      "path": "docs/design/06-虚构一天与数据说明.md",
+      "bytes": 4701,
+      "sha256": "6779f5e51aab2278c8d7b7b5c667bfbb3a66acb0ce2e9e93096bb52341da6638"
+    },
+    {
+      "path": "docs/design/README.md",
+      "bytes": 5078,
+      "sha256": "5597dff6abb6ef620e399a45d7705c305c2647654150d22fe727cc8616eed2a0"
+    },
+    {
+      "path": "docs/design/visual-tokens.json",
+      "bytes": 2308,
+      "sha256": "56f191adaf2e39e16d5c3918cbc2c6bcc49ab496d90648a416d61c1ed537bfad"
+    },
+    {
+      "path": "docs/development/内容审读与发布验收.md",
+      "bytes": 18890,
+      "sha256": "b12bc99c18115f00f52bf817ba3f7b4597f45c2e2bef10c015789331d16baf6c"
+    },
+    {
+      "path": "docs/development/客户端交付与验收.md",
+      "bytes": 17749,
+      "sha256": "0f5dd73f8cf618b13f7f086e6014526fd7a9b1d14581efaa21a5d96f6e75ba7c"
+    },
+    {
+      "path": "docs/development/并行协作说明.md",
+      "bytes": 5851,
+      "sha256": "449429a6699e31184ae68a7a95240509e91f5aca29eddda1edb91ed8c5d6f74d"
+    },
+    {
+      "path": "docs/development/开发任务明细.md",
+      "bytes": 22065,
+      "sha256": "bf766c7baf96e1e0af28f4fe3bab7f613701421b218afb38694483c2a969e73d"
+    },
+    {
+      "path": "docs/development/开发任务清单.json",
+      "bytes": 31902,
+      "sha256": "983c82669a6207b56d02f1f47cbd046ff0cf36ea4fc3c94237f9d48b672838a2"
+    },
+    {
+      "path": "docs/development/接口补齐清单.md",
+      "bytes": 18512,
+      "sha256": "c313eaf0e1c5cbbf458896d4aedbe2cf2ae1c3d9b75d9f4ee012c22580210cda"
+    },
+    {
+      "path": "docs/development/计划核对记录.md",
+      "bytes": 2870,
+      "sha256": "a0559fbf518ba84a89d4ff4ad9dac182c1df4733f83256733a059f55e3d2c4dd"
+    },
+    {
+      "path": "docs/specs/00-总体框架.md",
+      "bytes": 4805,
+      "sha256": "52071682321944820e065024776f7a5d003fa39b31420274d7da5ee6382cf3f5"
+    },
+    {
+      "path": "docs/specs/01-内容实施.md",
+      "bytes": 5026,
+      "sha256": "ef9b85c4c86716d4bdec107c560352d7ee08e121a04fc77f4429253c7f115b12"
+    },
+    {
+      "path": "docs/specs/02-开发实施.md",
+      "bytes": 6251,
+      "sha256": "8c4f54b7d1e206222e64bd5b255c1d3fd6d94e9c11118a0774235f3a4347d1e6"
+    },
+    {
+      "path": "docs/specs/03-安卓交互与状态规格.md",
+      "bytes": 12704,
+      "sha256": "6525c83d752bde10c10da029aaff76f9021dac8e80122b650bc852bf7d363779"
+    },
+    {
+      "path": "docs/specs/04-服务端数据与接口规格.md",
+      "bytes": 39192,
+      "sha256": "f5f789d2289322d9b56da6eb702d96c6185fccf2c6891e38b37fa660ff733f4e"
+    },
+    {
+      "path": "docs/specs/05-实施阶段与验收规格.md",
+      "bytes": 7681,
+      "sha256": "2f6f64822e75ee3809201b20797c9184111a870a456f290dbd4a232867937a33"
+    },
+    {
+      "path": "docs/v2/00-先看这里.md",
+      "bytes": 4003,
+      "sha256": "ca1d55550b726dbd71c4c6efa714a919f155816272170c245df0f8176a48706f"
+    },
+    {
+      "path": "docs/v2/01-产品定义与决策.md",
+      "bytes": 8330,
+      "sha256": "98077db4841c8837f07f305e5a5e455eeb27263891c92a9aca27a55e941d9fde"
+    },
+    {
+      "path": "docs/v2/02-界面与交互设计.md",
+      "bytes": 8080,
+      "sha256": "b5ed94c6aee9e7f660e3a8730521905f2376a2966412577d4aec9a350c447a6a"
+    },
+    {
+      "path": "docs/v2/03-技术架构与数据.md",
+      "bytes": 12190,
+      "sha256": "a7e950dcf939c3711169bc10090ce2c9fc1d1d4e84d284950a4b7682d0ac3552"
+    },
+    {
+      "path": "docs/v2/04-内容体系与首周.md",
+      "bytes": 6751,
+      "sha256": "0d46d208ab0e6021f2d9d451119c6e745fdf6539659db66f785e254ce47e0d24"
+    },
+    {
+      "path": "docs/v2/05-实施与验收.md",
+      "bytes": 5676,
+      "sha256": "07ff9d0c7e4b1de249dbb3f2a1c0111414819a4554919acbdebbfd88bf974a65"
+    },
+    {
+      "path": "docs/v2/06-来源与核验.md",
+      "bytes": 3290,
+      "sha256": "5e948e6de9940b56b78a547d69079e2dfcd0f75f466fbc7547f71774f4594339"
+    },
+    {
+      "path": "docs/v2/07-验证报告.md",
+      "bytes": 4867,
+      "sha256": "9e359b31aa9e70b58f3c2c17a79771d119ae4d72bd956083af1fdb1e5b173cd6"
+    },
+    {
+      "path": "docs/v2/08-详细开发计划.md",
+      "bytes": 19708,
+      "sha256": "68e718025bf82a72e2cc3b175675375d83384e5ea6ee639ac91a70662afe3524"
+    },
+    {
+      "path": "docs/v2/design-tokens.json",
+      "bytes": 1092,
+      "sha256": "2d67a666ebfaa2bd08263636f8224e2fbc36d98ced383a0f665cf73565ff6143"
+    },
+    {
+      "path": "prototype/admin/app.js",
+      "bytes": 30935,
+      "sha256": "0343b6ef963cd9e175b9a6c2358d60248019116e2e3f6302efb5d1279852509b"
+    },
+    {
+      "path": "prototype/admin/index.html",
+      "bytes": 2883,
+      "sha256": "0b483a063c0363c1b8cd8478145cfc9118979612e0978fad068237421298565d"
+    },
+    {
+      "path": "prototype/admin/styles.css",
+      "bytes": 5444,
+      "sha256": "c8ca16a9854ca45dcafad16f5b0c1bcf3da09e1fecd70db3c67bb48aeb6d2556"
+    },
+    {
+      "path": "prototype/index.html",
+      "bytes": 1720,
+      "sha256": "3392cfbd6c08fe3fa751e5d86d0045517d1e83154d31367357b6e098a81a2271"
+    },
+    {
+      "path": "prototype/mobile/app.js",
+      "bytes": 46222,
+      "sha256": "8d4ee168e4e841c40ca82134883c49a36e56d7efebc2a970a5d52f9ca5a0b852"
+    },
+    {
+      "path": "prototype/mobile/fixture.js",
+      "bytes": 31099,
+      "sha256": "cc9bbddfaacb2a3a5d6577f59bbd90420999b70e69dc106269c17f5fe0ecc19d"
+    },
+    {
+      "path": "prototype/mobile/index.html",
+      "bytes": 2986,
+      "sha256": "767ab69e9f0d0bfbabe6c1da60e976fc55f43279f35bf0c6da7f7f962a114102"
+    },
+    {
+      "path": "prototype/mobile/styles.css",
+      "bytes": 10126,
+      "sha256": "b708b54f4ba299e933413a0f34bf4ede8584b16247f2a7632e1220c9265a754f"
+    },
+    {
+      "path": "prototype/parent/app.js",
+      "bytes": 107744,
+      "sha256": "a293fd0535ca40518dae0df6d35bd67072f1c3d170f2ded32a0a9034907c3050"
+    },
+    {
+      "path": "prototype/parent/index.html",
+      "bytes": 5690,
+      "sha256": "4032e5a435736e8e918864cf4f88aa72208caa19eabde1fd0b0168c0dde6a564"
+    },
+    {
+      "path": "prototype/parent/styles.css",
+      "bytes": 20548,
+      "sha256": "523e9337f114d620f9c359096c79e9089384c5c2cfb03c2dc3acf6f51715f8a5"
+    },
+    {
+      "path": "prototype/README.md",
+      "bytes": 10515,
+      "sha256": "79ac2ed870208306423cc6853ced41a17f6a75bfc8e268ef15a5d1387bf992dc"
+    },
+    {
+      "path": "prototype/v2/app.js",
+      "bytes": 60471,
+      "sha256": "ad1704432e07eb21c04b30bc9910332178124d66fd69a046ad61251a4eb9f53e"
+    },
+    {
+      "path": "prototype/v2/content.js",
+      "bytes": 33424,
+      "sha256": "123afc8852a8001d86535f32e8e66398569042d5db56612447119869f2e226ec"
+    },
+    {
+      "path": "prototype/v2/index.html",
+      "bytes": 2748,
+      "sha256": "ba40d985136aedc2b2d698e8ff368bbd18a86d57ee9689a942e23b12a882265b"
+    },
+    {
+      "path": "prototype/v2/LUCIDE-LICENSE",
+      "bytes": 880,
+      "sha256": "1e7290b35280a048667bbf0ebabac1c7fd52a75300e8b2946ac165715997f2bc"
+    },
+    {
+      "path": "prototype/v2/lucide.min.js",
+      "bytes": 357796,
+      "sha256": "3411692820cb8d47543f69496aa25fd603a358f4498046f41c508a5a3342210e"
+    },
+    {
+      "path": "prototype/v2/README.md",
+      "bytes": 1954,
+      "sha256": "84a578e3a638ed40c2738eee4d6bc90a0318ad0f5a6cf924cf3ff3e76c9a76f8"
+    },
+    {
+      "path": "prototype/v2/styles.css",
+      "bytes": 27420,
+      "sha256": "3305a1563178f9f7a2c2a54140b717df7f37b73e94720d27ffe002489b622513"
+    },
+    {
+      "path": "prototype/验证记录.md",
+      "bytes": 7130,
+      "sha256": "d01f6649a6f7f5294f4a33c167a01afe7ba09c4c0aff58b2292a7987a13eb6de"
+    },
+    {
+      "path": "README.md",
+      "bytes": 7686,
+      "sha256": "554546999f76ce472ab08d95011049b1eb50c51794cab2e32cd8f95f47ff7a70"
+    },
+    {
+      "path": "tools/build_design_scenarios.py",
+      "bytes": 10240,
+      "sha256": "25973aec727692f3c922a7a6b743d18874b5660dd455b2cc74a7ff6b2f9d91e3"
+    },
+    {
+      "path": "tools/build_expanded_prototype.py",
+      "bytes": 21263,
+      "sha256": "bb38ec4de4ca900287c25b902e414240eeb989eacd45bcfdba7886ae1e060e82"
+    },
+    {
+      "path": "tools/build_mobile_prototype.py",
+      "bytes": 628,
+      "sha256": "03724e7d56807a463c125a6b56fc5e9df0eb8c3741d5f4ebc40738a8404df76f"
+    },
+    {
+      "path": "tools/build_v2_content.py",
+      "bytes": 25978,
+      "sha256": "3eefcac5cb077a0796bde139125e80d63c287bc52f31d84b3d81474ad80f1004"
+    },
+    {
+      "path": "tools/build_v2_contracts.py",
+      "bytes": 26515,
+      "sha256": "ab20a710b5fc7e2782dfb6ac4e5c3b49e72dfabda7bbbde47f707fff4a4d4db0"
+    },
+    {
+      "path": "tools/check_v2_delivery.cjs",
+      "bytes": 3266,
+      "sha256": "a592811a68f4ec07e5e541a80fd537a36c1f1685249e43fecc8dd7b290697d4d"
+    },
+    {
+      "path": "tools/check_v2_prototype.cjs",
+      "bytes": 12959,
+      "sha256": "2ea8bddea4afb821a72b92b2d728ebfb14f3a7f6ce353872fca8bd9223031e4d"
+    },
+    {
+      "path": "tools/package_design_handoff.py",
+      "bytes": 29406,
+      "sha256": "1a4260364243640cf66a9f56e19dc51b00509e4c555d53dcbaf9da5c23d776e7"
+    },
+    {
+      "path": "tools/package_v2_design.py",
+      "bytes": 9038,
+      "sha256": "b4c8faffb9f8a166dabe944c9e3294051412ad17b18ae3e0a218f39e13791666"
+    },
+    {
+      "path": "tools/render_development_plan.py",
+      "bytes": 11734,
+      "sha256": "ecb2b77ccdd7ff49b1a15f6bc442fa2632fd09ed56ef1f7f6addcde250e0c054"
+    },
+    {
+      "path": "tools/serve_prototype.py",
+      "bytes": 1240,
+      "sha256": "c430e5fcd4cf6704c810a426d75f1e0144afa89631dc89cb9ae1017ea1299a5d"
+    },
+    {
+      "path": "tools/validate_content.py",
+      "bytes": 4632,
+      "sha256": "9e40ba1bc9aaee12485519c3debbffe7682e7fbadf40b556f560241829253202"
+    },
+    {
+      "path": "tools/validate_v2_design.py",
+      "bytes": 6059,
+      "sha256": "e55f0d1c2dac47d4a4166afe2c477dcb18b2815a9b44fde45d519dc3e1910e11"
+    },
+    {
+      "path": "打开设计.html",
+      "bytes": 14442,
+      "sha256": "536a851d6f1bfd14417b56521d9c9a0cc1eb659d000243c26fb7527a092db0f3"
+    }
+  ]
+}

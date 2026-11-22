@@ -1,0 +1,110 @@
+{
+  "contentCards": 24,
+  "days": 7,
+  "scheduledItems": 42,
+  "stageSupports": 12,
+  "apiOperations": 69,
+  "apiSchemas": 32,
+  "resolvedRefs": 793,
+  "negativeCasesRejected": [
+    "missing_safety",
+    "duplicate_card",
+    "missing_source",
+    "bad_budget",
+    "wrong_age",
+    "withdrawn_card",
+    "premature_release",
+    "future_guide_reuses_wrong_age"
+  ],
+  "contrast": [
+    {
+      "theme": "light",
+      "foreground": "text",
+      "background": "background",
+      "ratio": 11.23,
+      "minimum": 4.5
+    },
+    {
+      "theme": "light",
+      "foreground": "textSecondary",
+      "background": "background",
+      "ratio": 5.11,
+      "minimum": 4.5
+    },
+    {
+      "theme": "light",
+      "foreground": "textSecondary",
+      "background": "surface",
+      "ratio": 5.52,
+      "minimum": 4.5
+    },
+    {
+      "theme": "light",
+      "foreground": "onPrimary",
+      "background": "primary",
+      "ratio": 7.46,
+      "minimum": 4.5
+    },
+    {
+      "theme": "light",
+      "foreground": "accent",
+      "background": "surface",
+      "ratio": 6.04,
+      "minimum": 4.5
+    },
+    {
+      "theme": "light",
+      "foreground": "outline",
+      "background": "surface",
+      "ratio": 3.71,
+      "minimum": 3
+    },
+    {
+      "theme": "dark",
+      "foreground": "text",
+      "background": "background",
+      "ratio": 15.15,
+      "minimum": 4.5
+    },
+    {
+      "theme": "dark",
+      "foreground": "textSecondary",
+      "background": "background",
+      "ratio": 9.39,
+      "minimum": 4.5
+    },
+    {
+      "theme": "dark",
+      "foreground": "textSecondary",
+      "background": "surface",
+      "ratio": 7.87,
+      "minimum": 4.5
+    },
+    {
+      "theme": "dark",
+      "foreground": "onPrimary",
+      "background": "primary",
+      "ratio": 8.46,
+      "minimum": 4.5
+    },
+    {
+      "theme": "dark",
+      "foreground": "accent",
+      "background": "surface",
+      "ratio": 7.96,
+      "minimum": 4.5
+    },
+    {
+      "theme": "dark",
+      "foreground": "outline",
+      "background": "surface",
+      "ratio": 5.0,
+      "minimum": 3
+    }
+  ],
+  "limits": [
+    "No medical/content expert review",
+    "No native/device or deployed API validation",
+    "API reference/schema checks are not an OpenAPI conformance certification"
+  ]
+}

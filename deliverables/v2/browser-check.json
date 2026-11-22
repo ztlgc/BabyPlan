@@ -1,0 +1,221 @@
+{
+  "checkedOn": "2026-11-13",
+  "browser": "Chromium 134 via Playwright 1.51.1",
+  "checks": [
+    {
+      "name": "9 mobile routes render at 390px without page overflow",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "Record participants and note persist after reload",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "Light mode and restore protect existing record and budget",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "Replace only selected unrecorded activity",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "Future date remains read-only after direct link and reload",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "Activity search filters and has an honest empty state",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "Offline simulation saves pending record locally",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "Conflict survives cancel/reload and retains both notes on merge",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "First memory requires parent confirmation; photo remains a placeholder",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "Measurement creates one real point, no invented trend or percentile",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "Height/length methods and weight are plotted separately",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "Dialog traps keyboard focus and Escape closes",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "Loading failure recovers without becoming empty content",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "Export produces JSON with missing-media manifest",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "Parent and admin desktop routes render at 1440px",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "Editor/reviewer/publisher gating, checklist, publish and withdrawal flow",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "18 mobile large-text/dark layout checks",
+      "passed": true,
+      "details": "{\"controlOverflowWarnings\":0}"
+    },
+    {
+      "name": "Parent/admin responsive layout at 768 and 360px",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "Print styling retains seven day cards and hides navigation",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "No JavaScript page errors",
+      "passed": true,
+      "details": ""
+    }
+  ],
+  "layoutChecks": [
+    {
+      "width": 360,
+      "hash": "today",
+      "page": false,
+      "controls": []
+    },
+    {
+      "width": 360,
+      "hash": "activity/roll/d1-1",
+      "page": false,
+      "controls": []
+    },
+    {
+      "width": 360,
+      "hash": "discover",
+      "page": false,
+      "controls": []
+    },
+    {
+      "width": 360,
+      "hash": "stage",
+      "page": false,
+      "controls": []
+    },
+    {
+      "width": 360,
+      "hash": "growth",
+      "page": false,
+      "controls": []
+    },
+    {
+      "width": 360,
+      "hash": "settings",
+      "page": false,
+      "controls": []
+    },
+    {
+      "width": 390,
+      "hash": "today",
+      "page": false,
+      "controls": []
+    },
+    {
+      "width": 390,
+      "hash": "activity/roll/d1-1",
+      "page": false,
+      "controls": []
+    },
+    {
+      "width": 390,
+      "hash": "discover",
+      "page": false,
+      "controls": []
+    },
+    {
+      "width": 390,
+      "hash": "stage",
+      "page": false,
+      "controls": []
+    },
+    {
+      "width": 390,
+      "hash": "growth",
+      "page": false,
+      "controls": []
+    },
+    {
+      "width": 390,
+      "hash": "settings",
+      "page": false,
+      "controls": []
+    },
+    {
+      "width": 430,
+      "hash": "today",
+      "page": false,
+      "controls": []
+    },
+    {
+      "width": 430,
+      "hash": "activity/roll/d1-1",
+      "page": false,
+      "controls": []
+    },
+    {
+      "width": 430,
+      "hash": "discover",
+      "page": false,
+      "controls": []
+    },
+    {
+      "width": 430,
+      "hash": "stage",
+      "page": false,
+      "controls": []
+    },
+    {
+      "width": 430,
+      "hash": "growth",
+      "page": false,
+      "controls": []
+    },
+    {
+      "width": 430,
+      "hash": "settings",
+      "page": false,
+      "controls": []
+    }
+  ],
+  "pageErrors": [],
+  "limits": [
+    "Mock localStorage state only; no real API/native permissions/sync/upload",
+    "No human family trial or expert child-content review"
+  ]
+}

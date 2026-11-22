@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "packageId": "family-play-demo",
+  "contentVersion": 1,
+  "channel": "demo",
+  "ageBands": [
+    { "id": "m00_02", "label": "0～2 月", "minMonths": 0, "maxMonths": 2 },
+    { "id": "m03_05", "label": "3～5 月", "minMonths": 3, "maxMonths": 5 },
+    { "id": "m06_08", "label": "6～8 月", "minMonths": 6, "maxMonths": 8 },
+    { "id": "m09_11", "label": "9～11 月", "minMonths": 9, "maxMonths": 11 },
+    { "id": "m12_17", "label": "12～17 月", "minMonths": 12, "maxMonths": 17 },
+    { "id": "m18_23", "label": "18～23 月", "minMonths": 18, "maxMonths": 23 },
+    { "id": "m24_35", "label": "24～35 月", "minMonths": 24, "maxMonths": 35 }
+  ],
+  "cards": [
+    {
+      "id": "demo_clap_m18",
+      "themeId": "clap_hands",
+      "title": "演示｜小手拍拍",
+      "ageBands": ["m18_23"],
+      "domains": ["song-rhythm", "zh-words", "daily-english", "quantity", "movement"],
+      "materials": [],
+      "steps": ["面对面坐，家长轻拍自己的手。", "停一停，看看宝宝想不想接着玩。"],
+      "dialogue": {
+        "opening": "这是我的手。你看，我拍一下——啪！",
+        "whenJoins": "你也拍啦！还想再来吗？",
+        "whenWatches": "你在看我的手。我再拍一次给你看。",
+        "whenStops": "好，我们拍拍手玩完啦。"
+      },
+      "keywordsZh": ["手", "拍"],
+      "english": {
+        "words": [{ "word": "clap", "meaningZh": "拍手" }, { "word": "hands", "meaningZh": "手" }],
+        "lines": [{ "line": "Let’s clap our hands!", "meaningZh": "我们一起拍拍手吧！", "when": "家长示范拍手时" }]
+      },
+      "song": {
+        "title": "如果感到幸福你就拍拍手",
+        "cue": "选熟悉的拍手段。哼一小段后，拍一拍，停一停。",
+        "originalChant": "小手伸出来，轻轻拍一下。停一停，等一等，想玩再来呀！"
+      },
+      "numberPlay": { "concept": "1（一下）", "action": "边说「一」边拍一下，再停住。", "adultLine": "一，拍了一下。" },
+      "variation": "下次可以等宝宝先动，家长跟着做。",
+      "safety": "家长拍自己的手，宝宝想停就停。",
+      "sources": [{ "title": "Head Start：在音乐和动作里玩数感", "url": "https://headstart.gov/teaching-practices/play-head-start-way/1-2-3-dance-me" }]
+    },
+    {
+      "id": "demo_ball_m18",
+      "themeId": "roll_ball",
+      "title": "演示｜球球滚过来",
+      "ageBands": ["m18_23", "m24_35"],
+      "domains": ["movement", "dialogue-reading"],
+      "materials": ["一颗大软球"],
+      "steps": ["在平坦、清空的地板上坐下。", "把球轻轻滚向宝宝，停下来等一等。"],
+      "dialogue": {
+        "opening": "球来啦。到你这儿了。",
+        "whenJoins": "球滚回来啦。",
+        "whenWatches": "你看，球停住了。",
+        "whenStops": "今天先把球收好。"
+      },
+      "safety": "选无松脱小零件的适龄大软球，大人在旁陪玩。",
+      "sources": [{ "title": "CDC：18 月龄的滚球等游戏", "url": "https://www.cdc.gov/act-early/milestones/18-months.html" }]
+    },
+    {
+      "id": "demo_clap_m24",
+      "themeId": "clap_hands",
+      "title": "演示｜你拍，我跟着",
+      "ageBands": ["m24_35"],
+      "domains": ["movement", "quantity", "life-emotions-turns", "daily-english"],
+      "materials": [],
+      "steps": ["家长示范拍一下。", "邀请宝宝先拍，家长跟着做。"],
+      "dialogue": {
+        "opening": "你想拍一下，还是两下？你先拍，我跟着。",
+        "whenJoins": "我跟你拍一样的。",
+        "whenWatches": "那我先拍给你看。",
+        "whenStops": "好，今天玩到这里。"
+      },
+      "numberPlay": { "concept": "一下或两下", "action": "家长边跟着拍边数。", "adultLine": "一、二，拍了两下。" },
+      "english": {
+        "words": [{ "word": "turn", "meaningZh": "轮次" }],
+        "lines": [{ "line": "Your turn.", "meaningZh": "轮到你啦。", "when": "邀请宝宝带头时" }]
+      },
+      "safety": "家长示范并跟着玩，孩子想停可以随时结束。",
+      "sources": [{ "title": "CDC：30 月龄的选择和轮流游戏", "url": "https://www.cdc.gov/act-early/milestones/30-months.html" }]
+    }
+  ],
+  "weekTemplates": [
+    {
+      "id": "demo_week_m18",
+      "title": "演示｜18～23 月联调周",
+      "ageBand": "m18_23",
+      "cardIds": ["demo_clap_m18", "demo_ball_m18", "demo_clap_m18", "demo_ball_m18", "demo_clap_m18", "demo_ball_m18", "demo_clap_m18"]
+    },
+    {
+      "id": "demo_week_m24",
+      "title": "演示｜24～35 月切换周",
+      "ageBand": "m24_35",
+      "cardIds": ["demo_clap_m24", "demo_ball_m18", "demo_clap_m24", "demo_ball_m18", "demo_clap_m24", "demo_ball_m18", "demo_clap_m24"]
+    }
+  ]
+}

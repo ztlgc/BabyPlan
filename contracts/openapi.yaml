@@ -1,0 +1,814 @@
+openapi: 3.1.0
+jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
+info:
+  title: 家庭亲子活动服务接口
+  version: 1.0.0
+  description: |
+    本文件是实现合同，不代表接口已经上线。M1 实现 options/create/read/current/checkin，以及 list 供排期发现；
+    M2 增加 summary、历史列表界面和客户端离线队列；M3 完成正式内容与发布；M4 的 AI 仅在服务端文档预留。
+    无账号注册、无管理后台、无公开内容导入/激活/回滚接口。所有请求使用预置家庭 Bearer 凭证。
+    家庭、周计划、任务、requestId 与打卡 operationId 使用 UUID；内容编号沿用内容合同的字符串编号。
+    OpenAPI 的 operationId 是生成客户端使用的英文方法名，与请求体内的 UUID operationId 无关。
+    date 是周时区内的业务日期；recordedAt、syncedAt 是以 Z 结尾的 UTC 事件时间。
+    首次建周固定家庭 IANA timezone，M1～M3 后续建周必须沿用；周内保留该时区快照。
+    所有对象拒绝未声明字段，外部内容对象遵循原内容合同。未知 JSON 字段、重复 JSON 键和无效格式返回 400。
+    成功建周与打卡结果在事务内保存幂等请求及原响应；先鉴权、校验归属、规范化并查找原请求，
+    命中相同载荷即重放，之后才对新请求验证活跃包、日期和 revision 等动态条件。
+    重放响应保留原响应体与状态码，可通过 Idempotency-Replayed 响应头标记；旧响应不是当前状态。
+    所有响应带 X-Request-Id。错误体 requestId 是本次 HTTP 调用的服务端追踪 UUID，
+    与 CreateWeek.requestId 的业务幂等 UUID 分离。鉴权后的读取和写入结果禁止共享缓存。
+servers:
+  - url: /v1
+    description: 服务部署地址下的版本前缀；实际域名与访问配置待部署环境确定
+security:
+  - FamilyBearer: []
+tags:
+  - name: content
+    description: M1，可开始的内容选择
+  - name: weeks
+    description: M1 建周、排期发现与读取；M2 历史列表界面
+  - name: checkins
+    description: M1 当前记录；M2 顺序离线补传
+  - name: summaries
+    description: M2 基础回顾
+paths:
+  /content/options:
+    get:
+      operationId: getContentOptions
+      tags: [content]
+      summary: 读取当前可开始的包与月龄模板
+      x-stage: M1
+      description: |
+        仅返回当前环境激活且有效的版本。每个包仅列出至少有一个有效模板的完整 ageBand；
+        weekTemplates 只保留 id、title、ageBand。不得把有卡片但没有模板的档位标为可开始。
+        无可用激活包时返回 503 CONTENT_UNAVAILABLE，不用空数组假装可开始。
+        开发环境允许 demo；家庭试用与正式环境仅允许 release。
+      responses:
+        '200':
+          description: 可开始的选择；这不是版本预留，建周仍须检查是否过期
+          headers:
+            X-Request-Id: { $ref: '#/components/headers/RequestId' }
+            Cache-Control: { $ref: '#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ContentOptions' }
+              examples:
+                demo:
+                  summary: 演示包仅两个档位有模板
+                  value:
+                    packages:
+                      - packageId: family-play-demo
+                        contentVersion: 1
+                        ageBands:
+                          - { id: m18_23, label: '18～23 月', minMonths: 18, maxMonths: 23 }
+                          - { id: m24_35, label: '24～35 月', minMonths: 24, maxMonths: 35 }
+                        weekTemplates:
+                          - { id: demo_week_m18, title: '演示｜18～23 月联调周', ageBand: m18_23 }
+                          - { id: demo_week_m24, title: '演示｜24～35 月切换周', ageBand: m24_35 }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '503': { $ref: '#/components/responses/ContentUnavailable' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /weeks:
+    post:
+      operationId: createWeek
+      tags: [weeks]
+      summary: 原子创建七天计划
+      x-stage: M1
+      description: |
+        首次 startDate 必须为请求 timezone 内今天；此后为 max(今天, 最近周 endDate + 1 日)。
+        endDate = startDate + 6 个日历日，不要求周一开始。允许一个尚未开始的预建周；
+        若已有 startDate > 今天的周，新 requestId 返回 409 PLANNED_WEEK_EXISTS。
+        家庭内所有周与任务日期不得重叠。七任务、完整卡片快照和建周幂等结果一次提交。
+        ageBand 从指定模板推导，不接收客户端年龄、卡片列表或 suggestionId。
+        鉴权后按家庭和 requestId 查重；相同规范化载荷返回原始 201 响应，即便包已切换、日期已跨日。
+        相同 requestId 不同载荷为 409 IDEMPOTENCY_CONFLICT。新请求才验证内容、起始日及并发约束。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateWeek' }
+            example:
+              requestId: 10000000-0000-4000-8000-000000000001
+              startDate: '2026-11-11'
+              timezone: Asia/Shanghai
+              packageId: family-play-demo
+              contentVersion: 1
+              templateId: demo_week_m18
+      responses:
+        '201':
+          description: 首次创建或原结果重放，week 包含七个完整任务
+          headers:
+            X-Request-Id: { $ref: '#/components/headers/RequestId' }
+            Cache-Control: { $ref: '#/components/headers/NoStore' }
+            Idempotency-Replayed: { $ref: '#/components/headers/Replayed' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WeekResponse' }
+        '400': { $ref: '#/components/responses/InvalidRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/CreateWeekConflict' }
+        '422': { $ref: '#/components/responses/AgeBandUnavailable' }
+        '503': { $ref: '#/components/responses/ContentUnavailable' }
+        '500': { $ref: '#/components/responses/InternalError' }
+    get:
+      operationId: listWeeks
+      tags: [weeks]
+      summary: 按游标读取家庭历史及预建周
+      x-stage: M1
+      description: |
+        M1 开始确认前以 limit=1 发现末周、固定时区和已有未来排期；历史浏览界面到 M2 才提供。
+        按 startDate 降序、id 降序排列，包含历史、当前和预建周。
+        cursor 是绑定家庭、排序和初次读取边界的不透明游标；后续新建周不插入本次翻页序列。
+        不返回总数。末页 nextCursor 为 null。游标无效或与本家庭不匹配返回 400，不泄露其他家庭信息。
+        游标稳定的是成员顺序，任务记录反映每页读取时的当前值，不提供跨页数据库快照。
+      parameters:
+        - name: limit
+          in: query
+          description: 每页周数，默认 10，最大 50
+          schema: { type: integer, minimum: 1, maximum: 50, default: 10 }
+        - name: cursor
+          in: query
+          description: 上页返回的不透明游标；首次请求省略
+          schema: { type: string, minLength: 1, maxLength: 2048 }
+      responses:
+        '200':
+          description: 一页完整周计划，可为空
+          headers:
+            X-Request-Id: { $ref: '#/components/headers/RequestId' }
+            Cache-Control: { $ref: '#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WeekList' }
+              example: { weeks: [], nextCursor: null }
+        '400': { $ref: '#/components/responses/InvalidRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /weeks/current:
+    get:
+      operationId: getCurrentWeek
+      tags: [weeks]
+      summary: 读取今天所在的周
+      x-stage: M1
+      description: |
+        按已固定的家庭 timezone 计算今天，查找 startDate <= 今天 <= endDate。
+        未首次建周、周间有空档或仅有未来预建周时均返回 200 {week:null}。
+        不把最近历史周或未来周冒充当前周；历史读取不依赖活跃内容包。
+        路由实现必须优先匹配 current，不能按 weekId UUID 解析。
+      responses:
+        '200':
+          description: 当前完整周或 null
+          headers:
+            X-Request-Id: { $ref: '#/components/headers/RequestId' }
+            Cache-Control: { $ref: '#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CurrentWeekResponse' }
+              example: { week: null }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /weeks/{weekId}:
+    get:
+      operationId: getWeek
+      tags: [weeks]
+      summary: 读取指定周及其历史卡片快照
+      x-stage: M1
+      parameters:
+        - { $ref: '#/components/parameters/WeekId' }
+      responses:
+        '200':
+          description: 本家庭的完整周；即使源包回滚或不可用也可读
+          headers:
+            X-Request-Id: { $ref: '#/components/headers/RequestId' }
+            Cache-Control: { $ref: '#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WeekResponse' }
+        '400': { $ref: '#/components/responses/InvalidRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /tasks/{taskId}/check-in:
+    put:
+      operationId: putCheckIn
+      tags: [checkins]
+      summary: 创建或改写任务的当前打卡结果
+      x-stage: M1
+      description: |
+        每任务最多一个当前 CheckIn；首次 baseRevision=0，成功新操作令 Task.revision 加一。
+        只允许 played 或 skipped，可历史补记、两状态互改及改反馈，不提供清空或 DELETE。
+        feedback 省略与 null 规范化为同一值；played 仅配 null/want_again；
+        skipped 仅配 null/family_busy/child_tired/time_unfit。
+        按任务所在周 timezone 的服务端今天判断，task.date > 今天时返回 422 FUTURE_TASK。
+        recordedAt 是手机实际点选的 UTC 时间，不能改变任务归属日期或参与并发排序。
+        顺序：鉴权、任务归属、静态解析与规范化、查本家庭 operationId、重放或幂等冲突、
+        再对新操作检查未来日期、反馈配对和 baseRevision。
+        相同 operationId 同载荷重放原 task；即使当前 revision 已变也不能再次写入。
+        新操作 baseRevision 不符返回 409 REVISION_CONFLICT，details.currentTask 带当前完整任务。
+        客户端同任务串行队列；冲突后显式重取并请家长重新确认，以新 operationId 和当前 revision 提交。
+        不得自动改 baseRevision 重发，不得让旧重放响应覆盖较新的本地操作。
+      parameters:
+        - { $ref: '#/components/parameters/TaskId' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PutCheckIn' }
+            examples:
+              played:
+                summary: 首次玩过并想再玩
+                value:
+                  operationId: 20000000-0000-4000-8000-000000000001
+                  baseRevision: 0
+                  status: played
+                  feedback: want_again
+                  recordedAt: '2026-11-11T11:30:00Z'
+              skipped:
+                summary: 改记为跳过，省略反馈等于 null
+                value:
+                  operationId: 20000000-0000-4000-8000-000000000002
+                  baseRevision: 1
+                  status: skipped
+                  recordedAt: '2026-11-11T12:00:00Z'
+      responses:
+        '200':
+          description: 新结果或原始结果重放；响应体固定为 task 包装
+          headers:
+            X-Request-Id: { $ref: '#/components/headers/RequestId' }
+            Cache-Control: { $ref: '#/components/headers/NoStore' }
+            Idempotency-Replayed: { $ref: '#/components/headers/Replayed' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TaskResponse' }
+              examples:
+                played: { $ref: '#/components/examples/TaskPlayed' }
+        '400': { $ref: '#/components/responses/InvalidRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/CheckInConflict' }
+        '422': { $ref: '#/components/responses/CheckInInvalid' }
+        '500': { $ref: '#/components/responses/InternalError' }
+  /weeks/{weekId}/summary:
+    get:
+      operationId: getWeekSummary
+      tags: [summaries]
+      summary: 读取七天基础汇总
+      x-stage: M2
+      description: |
+        M2 实现；M1 UI 不得伪装已提供回顾。只汇总服务端已同步记录，不推测本机待同步状态。
+        以周 timezone 的今天作为 asOfDate。日期晚于 asOfDate 为 future；其他日期有记录时为 played/skipped，
+        无记录时为 unrecorded。四项计数之和固定为 7。days 按日期升序。
+        recordsVersion 是包含周身份、七任务修订及 asOfDate 的不透明字符串；同一天同修订稳定，
+        任一修订或本地日期变化必须变化，防止跨日缓存失效遗漏。M2/M3 review 固定为 null。
+      parameters:
+        - { $ref: '#/components/parameters/WeekId' }
+      responses:
+        '200':
+          description: 一致性读取的基础汇总
+          headers:
+            X-Request-Id: { $ref: '#/components/headers/RequestId' }
+            Cache-Control: { $ref: '#/components/headers/NoStore' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WeekSummary' }
+              example:
+                weekId: 30000000-0000-4000-8000-000000000001
+                asOfDate: '2026-11-13'
+                recordsVersion: 'rv1:2026-11-13:7d872030e2'
+                counts: { played: 1, skipped: 1, unrecorded: 1, future: 4 }
+                days:
+                  - { taskId: 40000000-0000-4000-8000-000000000001, date: '2026-11-11', status: played, feedback: want_again }
+                  - { taskId: 40000000-0000-4000-8000-000000000002, date: '2026-11-12', status: skipped, feedback: family_busy }
+                  - { taskId: 40000000-0000-4000-8000-000000000003, date: '2026-11-13', status: unrecorded, feedback: null }
+                  - { taskId: 40000000-0000-4000-8000-000000000004, date: '2026-11-14', status: future, feedback: null }
+                  - { taskId: 40000000-0000-4000-8000-000000000005, date: '2026-11-15', status: future, feedback: null }
+                  - { taskId: 40000000-0000-4000-8000-000000000006, date: '2026-11-16', status: future, feedback: null }
+                  - { taskId: 40000000-0000-4000-8000-000000000007, date: '2026-11-17', status: future, feedback: null }
+                review: null
+        '400': { $ref: '#/components/responses/InvalidRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+components:
+  securitySchemes:
+    FamilyBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque
+      description: 运维预置的高熵家庭凭证；不使用 JWT 假设，无注册或登录接口；服务端只保存校验摘要
+  headers:
+    RequestId:
+      description: 本次 HTTP 请求的服务端追踪 UUID；重放也生成新追踪值
+      required: true
+      schema: { $ref: '#/components/schemas/Uuid' }
+    NoStore:
+      description: 家庭数据不进入共享缓存
+      required: true
+      schema: { type: string, const: no-store }
+    Replayed:
+      description: 可选；true 表示返回已保存的原成功响应，原响应体不追加字段
+      schema: { type: boolean }
+  parameters:
+    WeekId:
+      name: weekId
+      in: path
+      required: true
+      description: 周计划 UUID
+      schema: { $ref: '#/components/schemas/Uuid' }
+    TaskId:
+      name: taskId
+      in: path
+      required: true
+      description: 每日任务 UUID
+      schema: { $ref: '#/components/schemas/Uuid' }
+  schemas:
+    Uuid:
+      type: string
+      format: uuid
+      description: 标准带连字符 UUID；比较与输出采用小写规范形式
+      pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+    LocalDate:
+      type: string
+      format: date
+      pattern: '^\d{4}-\d{2}-\d{2}$'
+      description: 有效公历日期 YYYY-MM-DD，不含时间和偏移
+    Timezone:
+      type: string
+      minLength: 1
+      maxLength: 100
+      examples: [Asia/Shanghai]
+      description: 服务端时区库支持的 IANA 名称，如 Asia/Shanghai；拒绝固定偏移和未知名称，首次建周后固定
+    UtcInstant:
+      type: string
+      format: date-time
+      pattern: 'Z$'
+      description: RFC 3339 UTC 时间，必须以 Z 结尾；允许小数秒，规范化到相同瞬间的最短小数表示
+      examples: ['2026-11-11T11:30:00Z']
+    ContentId:
+      $ref: './content-package.schema.json#/$defs/id'
+    AgeBandId:
+      type: string
+      enum: [m00_02, m03_05, m06_08, m09_11, m12_17, m18_23, m24_35]
+      description: 固定七档业务编号；仅有模板的档位可开始
+    ContentOptions:
+      type: object
+      additionalProperties: false
+      required: [packages]
+      properties:
+        packages:
+          type: array
+          minItems: 1
+          items: { $ref: '#/components/schemas/PackageOption' }
+    PackageOption:
+      type: object
+      additionalProperties: false
+      required: [packageId, contentVersion, ageBands, weekTemplates]
+      properties:
+        packageId: { $ref: '#/components/schemas/ContentId' }
+        contentVersion: { type: integer, minimum: 1 }
+        ageBands:
+          type: array
+          minItems: 1
+          description: 完整档位对象，每个 id 唯一，且在本包至少有一个模板
+          items: { $ref: './content-package.schema.json#/$defs/ageBand' }
+        weekTemplates:
+          type: array
+          minItems: 1
+          description: 每个 id 唯一，ageBand 引用本响应 ageBands 中的 id
+          items: { $ref: '#/components/schemas/TemplateOption' }
+    TemplateOption:
+      type: object
+      additionalProperties: false
+      required: [id, title, ageBand]
+      properties:
+        id: { $ref: '#/components/schemas/ContentId' }
+        title: { type: string, minLength: 1, pattern: '\S' }
+        ageBand: { $ref: '#/components/schemas/AgeBandId' }
+    CreateWeek:
+      type: object
+      additionalProperties: false
+      required: [requestId, startDate, timezone, packageId, contentVersion, templateId]
+      properties:
+        requestId:
+          $ref: '#/components/schemas/Uuid'
+          description: 本家庭建周幂等键；一次确认产生一次 UUID，超时后原值重试
+        startDate: { $ref: '#/components/schemas/LocalDate' }
+        timezone: { $ref: '#/components/schemas/Timezone' }
+        packageId: { $ref: '#/components/schemas/ContentId' }
+        contentVersion: { type: integer, minimum: 1 }
+        templateId: { $ref: '#/components/schemas/ContentId' }
+    Week:
+      type: object
+      additionalProperties: false
+      required: [id, startDate, endDate, timezone, packageId, contentVersion, templateId, ageBand, tasks]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        startDate: { $ref: '#/components/schemas/LocalDate' }
+        endDate:
+          $ref: '#/components/schemas/LocalDate'
+          description: startDate 后第六个日历日，包含首尾共七天
+        timezone: { $ref: '#/components/schemas/Timezone' }
+        packageId: { $ref: '#/components/schemas/ContentId' }
+        contentVersion: { type: integer, minimum: 1 }
+        templateId: { $ref: '#/components/schemas/ContentId' }
+        ageBand:
+          $ref: '#/components/schemas/AgeBandId'
+          description: 建周模板的档位编号，历史固定不变
+        tasks:
+          type: array
+          minItems: 7
+          maxItems: 7
+          description: 按 date 升序；dayNumber 为 1～7，各日期连续且唯一
+          items: { $ref: '#/components/schemas/Task' }
+    Task:
+      type: object
+      additionalProperties: false
+      required: [id, date, dayNumber, cardId, cardSnapshot, checkIn, revision]
+      properties:
+        id: { $ref: '#/components/schemas/Uuid' }
+        date: { $ref: '#/components/schemas/LocalDate' }
+        dayNumber: { type: integer, minimum: 1, maximum: 7 }
+        cardId: { $ref: '#/components/schemas/ContentId' }
+        cardSnapshot:
+          $ref: './content-package.schema.json#/$defs/card'
+          description: 完整且不可变的建周时卡片快照；id 必须等于 cardId；不按当前包重新拼接
+        checkIn:
+          oneOf:
+            - { $ref: '#/components/schemas/CheckIn' }
+            - { type: 'null' }
+          description: null 表示尚无服务端记录，不使用 unrecorded 作为持久化状态
+        revision:
+          type: integer
+          minimum: 0
+          description: 初值 0，checkIn 为 null；每个成功新操作递增一，重放不递增
+      allOf:
+        - if:
+            properties: { revision: { const: 0 } }
+          then:
+            properties: { checkIn: { type: 'null' } }
+          else:
+            properties: { checkIn: { $ref: '#/components/schemas/CheckIn' } }
+    Feedback:
+      type: [string, 'null']
+      enum: [null, want_again, family_busy, child_tired, time_unfit]
+      description: 可空的单一反馈标签
+    CheckIn:
+      type: object
+      additionalProperties: false
+      required: [status, feedback, recordedAt, syncedAt, operationId]
+      properties:
+        status: { type: string, enum: [played, skipped] }
+        feedback: { $ref: '#/components/schemas/Feedback' }
+        recordedAt: { $ref: '#/components/schemas/UtcInstant' }
+        syncedAt:
+          $ref: '#/components/schemas/UtcInstant'
+          description: 本操作被服务端接受时的 UTC 时间，重放保持原值
+        operationId: { $ref: '#/components/schemas/Uuid' }
+      allOf:
+        - if:
+            properties: { status: { const: played } }
+          then:
+            properties: { feedback: { enum: [null, want_again] } }
+          else:
+            properties: { feedback: { enum: [null, family_busy, child_tired, time_unfit] } }
+    PutCheckIn:
+      type: object
+      additionalProperties: false
+      required: [operationId, baseRevision, status, recordedAt]
+      description: |
+        结构先允许反馈枚举全集；状态与反馈配对在幂等查找后作业务校验，错误为 422 INVALID_FEEDBACK。
+        非枚举值、null 状态、非法时间或字段类型为 400 INVALID_REQUEST。
+      properties:
+        operationId: { $ref: '#/components/schemas/Uuid' }
+        baseRevision: { type: integer, minimum: 0 }
+        status: { type: string, enum: [played, skipped] }
+        feedback:
+          $ref: '#/components/schemas/Feedback'
+          default: null
+          description: 省略等于 null；改记时不继承旧反馈
+        recordedAt: { $ref: '#/components/schemas/UtcInstant' }
+    WeekResponse:
+      type: object
+      additionalProperties: false
+      required: [week]
+      properties:
+        week: { $ref: '#/components/schemas/Week' }
+    CurrentWeekResponse:
+      type: object
+      additionalProperties: false
+      required: [week]
+      properties:
+        week:
+          oneOf:
+            - { $ref: '#/components/schemas/Week' }
+            - { type: 'null' }
+    TaskResponse:
+      type: object
+      additionalProperties: false
+      required: [task]
+      properties:
+        task: { $ref: '#/components/schemas/Task' }
+    WeekList:
+      type: object
+      additionalProperties: false
+      required: [weeks, nextCursor]
+      properties:
+        weeks:
+          type: array
+          maxItems: 50
+          items: { $ref: '#/components/schemas/Week' }
+        nextCursor:
+          type: [string, 'null']
+          minLength: 1
+          maxLength: 2048
+    SummaryDay:
+      type: object
+      additionalProperties: false
+      required: [taskId, date, status, feedback]
+      properties:
+        taskId: { $ref: '#/components/schemas/Uuid' }
+        date: { $ref: '#/components/schemas/LocalDate' }
+        status: { type: string, enum: [played, skipped, unrecorded, future] }
+        feedback: { $ref: '#/components/schemas/Feedback' }
+      allOf:
+        - if:
+            properties: { status: { const: played } }
+          then:
+            properties: { feedback: { enum: [null, want_again] } }
+        - if:
+            properties: { status: { const: skipped } }
+          then:
+            properties: { feedback: { enum: [null, family_busy, child_tired, time_unfit] } }
+        - if:
+            properties: { status: { enum: [unrecorded, future] } }
+          then:
+            properties: { feedback: { type: 'null' } }
+    WeekSummary:
+      type: object
+      additionalProperties: false
+      required: [weekId, asOfDate, recordsVersion, counts, days, review]
+      properties:
+        weekId: { $ref: '#/components/schemas/Uuid' }
+        asOfDate: { $ref: '#/components/schemas/LocalDate' }
+        recordsVersion:
+          type: string
+          minLength: 1
+          description: 不透明记录版本，包含周身份、七任务 revision 与 asOfDate；任一输入变化必须变化
+        counts:
+          type: object
+          additionalProperties: false
+          required: [played, skipped, unrecorded, future]
+          description: 必须与 days 一致且四项之和为 7，由服务层验证
+          properties:
+            played: { type: integer, minimum: 0, maximum: 7 }
+            skipped: { type: integer, minimum: 0, maximum: 7 }
+            unrecorded: { type: integer, minimum: 0, maximum: 7 }
+            future: { type: integer, minimum: 0, maximum: 7 }
+        days:
+          type: array
+          minItems: 7
+          maxItems: 7
+          items: { $ref: '#/components/schemas/SummaryDay' }
+        review:
+          type: 'null'
+          description: M2/M3 固定 null；AI 合同在 M4 单独设计
+    ErrorCode:
+      type: string
+      enum:
+        - INVALID_REQUEST
+        - UNAUTHORIZED
+        - NOT_FOUND
+        - CONTENT_STALE
+        - WEEK_OVERLAP
+        - START_DATE_CONFLICT
+        - IDEMPOTENCY_CONFLICT
+        - REVISION_CONFLICT
+        - PLANNED_WEEK_EXISTS
+        - FUTURE_TASK
+        - INVALID_FEEDBACK
+        - AGE_BAND_UNAVAILABLE
+        - CONTENT_UNAVAILABLE
+        - INTERNAL_ERROR
+    ErrorDetails:
+      type: object
+      additionalProperties: false
+      description: 按错误选择字段，不包含凭证、其他家庭信息或数据库内部信息
+      properties:
+        fields:
+          type: array
+          items: { type: string }
+        expectedStartDate: { $ref: '#/components/schemas/LocalDate' }
+        timezone: { $ref: '#/components/schemas/Timezone' }
+        currentTask: { $ref: '#/components/schemas/Task' }
+        existingWeekId: { $ref: '#/components/schemas/Uuid' }
+        activeContentVersion: { type: integer, minimum: 1 }
+        asOfDate: { $ref: '#/components/schemas/LocalDate' }
+        ageBand: { $ref: '#/components/schemas/AgeBandId' }
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      required: [error, requestId]
+      properties:
+        error:
+          type: object
+          additionalProperties: false
+          required: [code, message]
+          properties:
+            code: { $ref: '#/components/schemas/ErrorCode' }
+            message: { type: string, minLength: 1, description: 给家长或开发者的中文说明；客户端判断以 code 为准 }
+            details: { $ref: '#/components/schemas/ErrorDetails' }
+        requestId: { $ref: '#/components/schemas/Uuid' }
+      allOf:
+        - if:
+            properties:
+              error:
+                properties: { code: { const: REVISION_CONFLICT } }
+          then:
+            properties:
+              error:
+                required: [details]
+                properties:
+                  details: { required: [currentTask] }
+  responses:
+    InvalidRequest:
+      description: 400 INVALID_REQUEST；结构、UUID、日期、IANA 时区、查询参数非法，或建周时区不等于已固定家庭时区
+      headers:
+        X-Request-Id: { $ref: '#/components/headers/RequestId' }
+        Cache-Control: { $ref: '#/components/headers/NoStore' }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+          example:
+            error: { code: INVALID_REQUEST, message: 请求字段不符合约定, details: { fields: [timezone] } }
+            requestId: 50000000-0000-4000-8000-000000000001
+    Unauthorized:
+      description: 401 UNAUTHORIZED；缺少、错误、已撤销的家庭凭证；不返回家庭是否存在的信息
+      headers:
+        X-Request-Id: { $ref: '#/components/headers/RequestId' }
+        Cache-Control: { $ref: '#/components/headers/NoStore' }
+        WWW-Authenticate:
+          description: 标准 Bearer 鉴权挑战，不包含凭证信息
+          schema: { type: string, const: Bearer }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+          example:
+            error: { code: UNAUTHORIZED, message: 家庭凭证无效或已失效 }
+            requestId: 50000000-0000-4000-8000-000000000002
+    NotFound:
+      description: 404 NOT_FOUND；资源不存在或属于其他家庭，两者响应相同；必须在幂等记录查询前检查归属
+      headers:
+        X-Request-Id: { $ref: '#/components/headers/RequestId' }
+        Cache-Control: { $ref: '#/components/headers/NoStore' }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+          example:
+            error: { code: NOT_FOUND, message: 未找到记录 }
+            requestId: 50000000-0000-4000-8000-000000000003
+    CreateWeekConflict:
+      description: |
+        409 CONTENT_STALE：所选包版本不再激活或不可选择，应刷新 options 并重新确认。
+        WEEK_OVERLAP：与本家庭已有周区间或任务日期重叠。
+        START_DATE_CONFLICT：startDate 不符合规则，details.expectedStartDate 提供应选日期。
+        IDEMPOTENCY_CONFLICT：相同建周 requestId 被用于不同规范化载荷。
+        PLANNED_WEEK_EXISTS：已有尚未开始的周，details.existingWeekId 返回其编号。
+      headers:
+        X-Request-Id: { $ref: '#/components/headers/RequestId' }
+        Cache-Control: { $ref: '#/components/headers/NoStore' }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+          examples:
+            stale:
+              value:
+                error: { code: CONTENT_STALE, message: 内容已更新，请重新选择, details: { activeContentVersion: 2 } }
+                requestId: 50000000-0000-4000-8000-000000000004
+            start:
+              value:
+                error: { code: START_DATE_CONFLICT, message: 请使用下一可用起始日, details: { expectedStartDate: '2026-11-18', timezone: Asia/Shanghai } }
+                requestId: 50000000-0000-4000-8000-000000000005
+            overlap:
+              value:
+                error: { code: WEEK_OVERLAP, message: 该日期已有计划, details: { existingWeekId: 30000000-0000-4000-8000-000000000001 } }
+                requestId: 50000000-0000-4000-8000-000000000006
+            planned:
+              value:
+                error: { code: PLANNED_WEEK_EXISTS, message: 已有尚未开始的一周, details: { existingWeekId: 30000000-0000-4000-8000-000000000002 } }
+                requestId: 50000000-0000-4000-8000-000000000007
+            idempotency:
+              value:
+                error: { code: IDEMPOTENCY_CONFLICT, message: 此请求编号已用于其他内容 }
+                requestId: 50000000-0000-4000-8000-000000000008
+    CheckInConflict:
+      description: |
+        409 IDEMPOTENCY_CONFLICT：本家庭 operationId 已用于其他载荷或另一个本家庭任务。
+        REVISION_CONFLICT：新操作的 baseRevision 不等于当前 revision，details.currentTask 必须完整返回。
+        重放命中在 revision 检查之前；不得自动覆盖当前记录。
+      headers:
+        X-Request-Id: { $ref: '#/components/headers/RequestId' }
+        Cache-Control: { $ref: '#/components/headers/NoStore' }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+          examples:
+            idempotency:
+              value:
+                error: { code: IDEMPOTENCY_CONFLICT, message: 此操作编号已用于其他内容 }
+                requestId: 50000000-0000-4000-8000-000000000009
+    CheckInInvalid:
+      description: |
+        422 FUTURE_TASK：任务日期晚于周时区今天，details.asOfDate 给出判定日期。
+        INVALID_FEEDBACK：枚举内反馈与 played/skipped 状态不配对。
+      headers:
+        X-Request-Id: { $ref: '#/components/headers/RequestId' }
+        Cache-Control: { $ref: '#/components/headers/NoStore' }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+          examples:
+            future:
+              value:
+                error: { code: FUTURE_TASK, message: 未来的活动还不能打卡, details: { asOfDate: '2026-11-11' } }
+                requestId: 50000000-0000-4000-8000-000000000010
+            feedback:
+              value:
+                error: { code: INVALID_FEEDBACK, message: 此反馈不适用于所选状态 }
+                requestId: 50000000-0000-4000-8000-000000000011
+    AgeBandUnavailable:
+      description: 422 AGE_BAND_UNAVAILABLE；在活跃版本中指定模板不存在或所属档位不可开始；UI 应提示该档内容待补
+      headers:
+        X-Request-Id: { $ref: '#/components/headers/RequestId' }
+        Cache-Control: { $ref: '#/components/headers/NoStore' }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+          example:
+            error: { code: AGE_BAND_UNAVAILABLE, message: 当前内容还没有该档可开始的七天模板 }
+            requestId: 50000000-0000-4000-8000-000000000012
+    ContentUnavailable:
+      description: 503 CONTENT_UNAVAILABLE；无可用激活包、活跃内容损坏或当前环境禁止该渠道；历史读取及打卡不依赖活跃包
+      headers:
+        X-Request-Id: { $ref: '#/components/headers/RequestId' }
+        Cache-Control: { $ref: '#/components/headers/NoStore' }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+          example:
+            error: { code: CONTENT_UNAVAILABLE, message: 当前内容暂不可用，请稍后重试 }
+            requestId: 50000000-0000-4000-8000-000000000013
+    InternalError:
+      description: 500 INTERNAL_ERROR；未分类内部失败，事务回滚；客户端可使用原幂等键重试写入
+      headers:
+        X-Request-Id: { $ref: '#/components/headers/RequestId' }
+        Cache-Control: { $ref: '#/components/headers/NoStore' }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+          example:
+            error: { code: INTERNAL_ERROR, message: 服务暂时出错，请稍后重试 }
+            requestId: 50000000-0000-4000-8000-000000000014
+  examples:
+    TaskPlayed:
+      summary: 完整卡片快照与第一次打卡
+      value:
+        task:
+          id: 40000000-0000-4000-8000-000000000001
+          date: '2026-11-11'
+          dayNumber: 1
+          cardId: demo_clap_m18
+          cardSnapshot:
+            id: demo_clap_m18
+            themeId: clap_hands
+            title: 演示｜小手拍拍
+            ageBands: [m18_23]
+            domains: [song-rhythm, zh-words, daily-english, quantity, movement]
+            materials: []
+            steps: [面对面坐，家长轻拍自己的手。, 停一停，看看宝宝想不想接着玩。]
+            dialogue:
+              opening: 这是我的手。你看，我拍一下——啪！
+              whenJoins: 你也拍啦！还想再来吗？
+              whenWatches: 你在看我的手。我再拍一次给你看。
+              whenStops: 好，我们拍拍手玩完啦。
+            keywordsZh: [手, 拍]
+            english:
+              words:
+                - { word: clap, meaningZh: 拍手 }
+                - { word: hands, meaningZh: 手 }
+              lines:
+                - { line: 'Let’s clap our hands!', meaningZh: 我们一起拍拍手吧！, when: 家长示范拍手时 }
+            song:
+              title: 如果感到幸福你就拍拍手
+              cue: 选熟悉的拍手段。哼一小段后，拍一拍，停一停。
+              originalChant: 小手伸出来，轻轻拍一下。停一停，等一等，想玩再来呀！
+            numberPlay: { concept: 1（一下）, action: 边说「一」边拍一下，再停住。, adultLine: 一，拍了一下。 }
+            variation: 下次可以等宝宝先动，家长跟着做。
+            safety: 家长拍自己的手，宝宝想停就停。
+            sources:
+              - { title: Head Start：在音乐和动作里玩数感, url: 'https://headstart.gov/teaching-practices/play-head-start-way/1-2-3-dance-me' }
+          checkIn:
+            status: played
+            feedback: want_again
+            recordedAt: '2026-11-11T11:30:00Z'
+            syncedAt: '2026-11-11T11:30:02Z'
+            operationId: 20000000-0000-4000-8000-000000000001
+          revision: 1

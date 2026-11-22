@@ -1,0 +1,2 @@
+d49884e9a9318b461798ddd583344f684b14555645ef8e03d8e39de220ae9ea8  BabyPlan-0.1.3-delivery.zip
+bfefb83aa9f93b24a1c64c5d804cc06c5228d82a03212e707f19840447b39ea4  BabyPlan-0.1.3-windows-service.zip

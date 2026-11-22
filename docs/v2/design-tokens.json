@@ -1,0 +1,57 @@
+{
+  "version": "2.0.0-design",
+  "status": "design_decision_not_brand_approval",
+  "colors": {
+    "light": {
+      "background": "#F7F5EF",
+      "surface": "#FFFEFA",
+      "text": "#28392E",
+      "textSecondary": "#606B60",
+      "primary": "#435B43",
+      "onPrimary": "#FFFFFF",
+      "accent": "#9B4B32",
+      "outline": "#7D8779"
+    },
+    "dark": {
+      "background": "#181E19",
+      "surface": "#242D26",
+      "text": "#F1F3EB",
+      "textSecondary": "#B9C4B6",
+      "primary": "#C0D3AF",
+      "onPrimary": "#203321",
+      "accent": "#F0B599",
+      "outline": "#8E9E87"
+    }
+  },
+  "typography": {
+    "body": {
+      "size": 16,
+      "lineHeight": 1.65
+    },
+    "secondary": {
+      "size": 14,
+      "lineHeight": 1.6
+    },
+    "title": {
+      "size": 30,
+      "lineHeight": 1.4
+    }
+  },
+  "spacing": [
+    4,
+    8,
+    12,
+    16,
+    24,
+    32,
+    48
+  ],
+  "radius": {
+    "card": 20,
+    "button": 14,
+    "dialog": 24
+  },
+  "minimumTouchTarget": 48,
+  "motionMs": 150,
+  "reducedMotionMs": 0
+}

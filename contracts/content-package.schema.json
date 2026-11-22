@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Family play content package, schema version 1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "packageId", "contentVersion", "channel", "ageBands", "cards", "weekTemplates"],
+  "properties": {
+    "schemaVersion": { "type": "integer", "const": 1 },
+    "packageId": { "$ref": "#/$defs/id" },
+    "contentVersion": { "type": "integer", "minimum": 1 },
+    "channel": { "enum": ["demo", "release"] },
+    "ageBands": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/ageBand" } },
+    "cards": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/card" } },
+    "weekTemplates": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/weekTemplate" } }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9_-]{0,63}$" },
+    "text": { "type": "string", "minLength": 1, "pattern": "\\S" },
+    "ageBand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "minMonths", "maxMonths"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "label": { "$ref": "#/$defs/text" },
+        "minMonths": { "type": "integer", "minimum": 0 },
+        "maxMonths": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "domain": {
+      "enum": ["song-rhythm", "zh-words", "dialogue-reading", "daily-english", "quantity", "exploration", "movement", "life-emotions-turns"]
+    },
+    "dialogue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["opening", "whenJoins", "whenWatches", "whenStops"],
+      "properties": {
+        "opening": { "$ref": "#/$defs/text" },
+        "whenJoins": { "$ref": "#/$defs/text" },
+        "whenWatches": { "$ref": "#/$defs/text" },
+        "whenStops": { "$ref": "#/$defs/text" }
+      }
+    },
+    "englishWord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["word", "meaningZh"],
+      "properties": {
+        "word": { "$ref": "#/$defs/text" },
+        "meaningZh": { "$ref": "#/$defs/text" }
+      }
+    },
+    "englishLine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["line", "meaningZh", "when"],
+      "properties": {
+        "line": { "$ref": "#/$defs/text" },
+        "meaningZh": { "$ref": "#/$defs/text" },
+        "when": { "$ref": "#/$defs/text" }
+      }
+    },
+    "english": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["words", "lines"],
+      "properties": {
+        "words": { "type": "array", "minItems": 1, "maxItems": 3, "items": { "$ref": "#/$defs/englishWord" } },
+        "lines": { "type": "array", "minItems": 1, "maxItems": 3, "items": { "$ref": "#/$defs/englishLine" } }
+      }
+    },
+    "song": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "cue"],
+      "properties": {
+        "title": { "$ref": "#/$defs/text" },
+        "cue": { "$ref": "#/$defs/text" },
+        "originalChant": { "$ref": "#/$defs/text" }
+      }
+    },
+    "numberPlay": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["concept", "action", "adultLine"],
+      "properties": {
+        "concept": { "$ref": "#/$defs/text" },
+        "action": { "$ref": "#/$defs/text" },
+        "adultLine": { "$ref": "#/$defs/text" }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "url"],
+      "properties": {
+        "title": { "$ref": "#/$defs/text" },
+        "url": { "type": "string", "format": "uri", "pattern": "^https://[^/\\s]+(?:/|$)" }
+      }
+    },
+    "card": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "themeId", "title", "ageBands", "domains", "materials", "steps", "dialogue", "safety", "sources"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "themeId": { "$ref": "#/$defs/id" },
+        "title": { "$ref": "#/$defs/text" },
+        "ageBands": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/id" } },
+        "domains": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/domain" } },
+        "materials": { "type": "array", "items": { "$ref": "#/$defs/text" } },
+        "steps": { "type": "array", "minItems": 1, "maxItems": 5, "items": { "$ref": "#/$defs/text" } },
+        "dialogue": { "$ref": "#/$defs/dialogue" },
+        "keywordsZh": { "type": "array", "minItems": 1, "maxItems": 3, "items": { "$ref": "#/$defs/text" } },
+        "english": { "$ref": "#/$defs/english" },
+        "song": { "$ref": "#/$defs/song" },
+        "numberPlay": { "$ref": "#/$defs/numberPlay" },
+        "variation": { "$ref": "#/$defs/text" },
+        "safety": { "$ref": "#/$defs/text" },
+        "sources": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/source" } }
+      }
+    },
+    "weekTemplate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "ageBand", "cardIds"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "title": { "$ref": "#/$defs/text" },
+        "ageBand": { "$ref": "#/$defs/id" },
+        "cardIds": { "type": "array", "minItems": 7, "maxItems": 7, "items": { "$ref": "#/$defs/id" } }
+      }
+    }
+  }
+}

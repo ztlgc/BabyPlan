@@ -1,0 +1,7174 @@
+openapi: 3.1.0
+info:
+  title: BabyPlan v2 多成员陪伴实施合同
+  version: 2.2.0
+  description: 实施合同。各端以此为准；接口列入合同不表示已经实现。家庭与内容权限隔离。
+servers:
+- url: http://127.0.0.1:4318/v2
+  description: 本地开发目标；服务运行状态另验收
+security: &id009
+- bearerSession: []
+- cookieSession: []
+paths:
+  /sessions:
+    post:
+      operationId: createSession
+      summary: 登录
+      description: 客户端显式选择mobile/web；密码使用Argon2id散列。mobile不设置Cookie。web检查同源Origin，设置bp_session/bp_refresh，Path=/v2、HttpOnly、SameSite=Strict；Secure属性跟随PUBLIC_BASE_URL使用的HTTP或HTTPS协议。HTTP仅限可信局域网。限速且不记录密码/令牌。
+      security: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        '400': &id001
+          description: 参数、日期或单位不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401': &id002
+          description: 会话无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403': &id003
+          description: 角色不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404': &id004
+          description: 对象不存在或不可见
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409': &id005
+          description: 修订、幂等或业务冲突；details含current/submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429': &id006
+          description: 请求过于频繁
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503': &id007
+          description: 暂时不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 1
+                  maxLength: 256
+                deviceId: &id008
+                  type: string
+                  format: uuid
+                clientType:
+                  type: string
+                  enum:
+                  - mobile
+                  - web
+              required:
+              - email
+              - password
+              - deviceId
+              - clientType
+  /sessions/refresh:
+    post:
+      operationId: refreshSession
+      summary: 旋转刷新会话
+      description: mobile须X-Refresh-Token，web须刷新Cookie且Origin与X-CSRF-Token正确。绑定deviceId和clientType；同一会话串行轮转。响应交付新令牌，旧令牌复用撤销整条会话家族。
+      security:
+      - refreshCookie: []
+      - refreshHeader: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                deviceId: *id008
+                clientType:
+                  type: string
+                  enum:
+                  - mobile
+                  - web
+              required:
+              - deviceId
+              - clientType
+      parameters:
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+  /sessions/current:
+    delete:
+      operationId: deleteSession
+      summary: 退出当前设备
+      description: 退出当前设备
+      security: *id009
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  accepted:
+                    const: true
+                required:
+                - accepted
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+  /accounts/recovery:
+    post:
+      operationId: requestRecovery
+      summary: 请求账号恢复
+      description: 不泄露账号是否存在；一次性重置令牌24小时有效，管理员安全交付或邮件发送。
+      security: []
+      responses:
+        '202':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  accepted:
+                    const: true
+                required:
+                - accepted
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                email:
+                  type: string
+                  format: email
+              required:
+              - email
+  /accounts/reset:
+    post:
+      operationId: resetPassword
+      summary: 用一次性令牌重置密码
+      description: 令牌单次使用，仅存摘要；重置后撤销既有会话。
+      security: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  accepted:
+                    const: true
+                required:
+                - accepted
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                token:
+                  type: string
+                  minLength: 1
+                  maxLength: 4096
+                newPassword:
+                  type: string
+                  minLength: 12
+                  maxLength: 256
+              required:
+              - token
+              - newPassword
+  /bootstrap:
+    get:
+      operationId: getBootstrap
+      summary: 读取本人家庭与孩子
+      description: 读取本人家庭与孩子
+      security: *id009
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  families:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Family'
+                    minItems: 0
+                    maxItems: 10
+                  children:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Child'
+                    minItems: 0
+                    maxItems: 20
+                  contentRoles:
+                    type: array
+                    items:
+                      type: string
+                      enum:
+                      - editor
+                      - reviewer
+                      - publisher
+                    minItems: 0
+                    maxItems: 3
+                required:
+                - user
+                - families
+                - children
+                - contentRoles
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /families:
+    post:
+      operationId: createFamily
+      summary: 创建私人家庭
+      description: 仅获部署引导授权的用户可创建；IANA时区校验，一次事务创建owner与首个孩子。
+      security: *id009
+      responses:
+        '201':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Family'
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id008
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 80
+                timezone:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                child:
+                  $ref: '#/components/schemas/AgeInput'
+              required:
+              - operationId
+              - name
+              - timezone
+              - child
+      parameters:
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+  /families/{familyId}/invitations:
+    post:
+      operationId: createInvitation
+      summary: 邀请照护者
+      description: 仅owner；可由管理员设置4～32位邀请码，也可省略code生成高熵单次令牌。邀请码24小时失效且只能使用一次，服务端仅存摘要。邀请码应避开生日、手机号等易猜内容。
+      security: *id009
+      responses:
+        '201':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  id: *id008
+                  invitationToken:
+                    type: string
+                    minLength: 4
+                    maxLength: 4096
+                  expiresAt: &id015
+                    type: string
+                    format: date-time
+                required:
+                - id
+                - invitationToken
+                - expiresAt
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: familyId
+        in: path
+        required: true
+        schema: *id008
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id008
+                code:
+                  type: string
+                  minLength: 4
+                  maxLength: 32
+                  description: 可选自定义邀请码；支持中文、字母、数字、下划线或短横线，不能包含空白。
+              required:
+              - operationId
+  /invitations/accept:
+    post:
+      operationId: acceptInvitation
+      summary: 接受家庭邀请
+      description: 先登录；锁定邀请并事务检查未使用/未过期，新增成员，不能提权成owner。
+      security: *id009
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Family'
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id008
+                token:
+                  type: string
+                  minLength: 1
+                  maxLength: 4096
+              required:
+              - operationId
+              - token
+      parameters:
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+  /invitations/redeem:
+    post:
+      operationId: redeemInvitation
+      summary: 凭邀请创建账号并加入家庭
+      description: 无公开注册；只有有效一次性邀请可创建账号。锁定令牌并事务创建账号/成员；已有邮箱不覆盖密码，提示走登录接受邀请。限速、防重复、令牌仅存摘要。
+      security: []
+      responses:
+        '201':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  sessionId:
+                    type: string
+                    format: uuid
+                  accessToken:
+                    anyOf:
+                    - type: string
+                      minLength: 1
+                      maxLength: 4096
+                    - type: 'null'
+                  refreshToken:
+                    anyOf:
+                    - type: string
+                      minLength: 1
+                      maxLength: 4096
+                    - type: 'null'
+                  expiresAt: &id010
+                    type: string
+                    format: date-time
+                  refreshExpiresAt: *id010
+                  csrfToken:
+                    anyOf:
+                    - type: string
+                      minLength: 1
+                      maxLength: 256
+                    - type: 'null'
+                  family:
+                    $ref: '#/components/schemas/Family'
+                required:
+                - user
+                - sessionId
+                - accessToken
+                - refreshToken
+                - expiresAt
+                - refreshExpiresAt
+                - csrfToken
+                - family
+                description: mobile返回两种令牌且csrfToken=null；web令牌字段均null，令牌只通过HttpOnly Cookie交付。访问15分钟、刷新30天。刷新每次轮转，旧令牌复用撤销同一会话令牌家族。
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id008
+                token:
+                  type: string
+                  minLength: 1
+                  maxLength: 4096
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 12
+                  maxLength: 256
+                displayName:
+                  type: string
+                  minLength: 1
+                  maxLength: 60
+                deviceId: *id008
+                clientType:
+                  type: string
+                  enum:
+                  - mobile
+                  - web
+              required:
+              - operationId
+              - token
+              - email
+              - password
+              - displayName
+              - deviceId
+              - clientType
+  /families/{familyId}/members/{userId}:
+    delete:
+      operationId: removeMember
+      summary: 移除家庭成员
+      description: 仅owner；禁止移除最后一位owner，撤销该成员家庭访问与后续下载授权。
+      security: *id009
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ack'
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: familyId
+        in: path
+        required: true
+        schema: *id008
+      - name: userId
+        in: path
+        required: true
+        schema: *id008
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id008
+              required:
+              - operationId
+  /children/{childId}:
+    patch:
+      operationId: updateChild
+      summary: 更新孩子年龄精度
+      description: months必须有ageMonths/ageAsOf且birthDate为空；birthDate模式相反。家庭成员可编辑，保留审计。
+      security: *id009
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Child'
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: childId
+        in: path
+        required: true
+        schema: *id008
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id008
+                baseRevision: &id011
+                  type: integer
+                  minimum: 0
+                age:
+                  $ref: '#/components/schemas/AgeInput'
+              required:
+              - operationId
+              - baseRevision
+              - age
+  /children/{childId}/plans/ensure:
+    post:
+      operationId: ensurePlans
+      summary: 补足未来七天安排
+      description: 日期由服务端家庭时区计算；唯一约束、锁与确定性编排，保护已有修改，不接受任意儿童familyId。
+      security: *id009
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  days:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DayPlan'
+                    minItems: 0
+                    maxItems: 7
+                required:
+                - days
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: childId
+        in: path
+        required: true
+        schema: *id008
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id008
+              required:
+              - operationId
+  /children/{childId}/days/{date}:
+    get:
+      operationId: getDayPlan
+      summary: 读取一天
+      description: 无计划返回null；已撤回内容加阻断，响应包括完整快照与参与摘要。
+      security: *id009
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/DayPlan'
+                - type: 'null'
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: childId
+        in: path
+        required: true
+        schema: *id008
+      - name: date
+        in: path
+        required: true
+        schema: &id013
+          type: string
+          format: date
+  /days/{dayId}/mode:
+    put:
+      operationId: setDayMode
+      summary: 切换当天预算模式
+      description: 只重排未开始未记录项；保留家长锁定项。保留项导致总预算超过20时返回真实预算，不伪称20。
+      security: *id009
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DayPlan'
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: dayId
+        in: path
+        required: true
+        schema: *id008
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id008
+                baseRevision: *id011
+                mode:
+                  type: string
+                  enum:
+                  - standard
+                  - lite
+              required:
+              - operationId
+              - baseRevision
+              - mode
+  /plan-items/{itemId}/replace:
+    post:
+      operationId: replacePlanItem
+      summary: 替换一个未开始项目
+      description: 事务校验适龄、材料、发布、撤回、未开始且无记录；成功锁定家长修改。
+      security: *id009
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanItem'
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: itemId
+        in: path
+        required: true
+        schema: *id008
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id008
+                baseRevision: *id011
+                activityId:
+                  type: string
+                  minLength: 1
+                  maxLength: 60
+                activityRevision:
+                  type: integer
+                  minimum: 1
+              required:
+              - operationId
+              - baseRevision
+              - activityId
+              - activityRevision
+  /plan-items/{itemId}/start:
+    post:
+      operationId: startPlanItem
+      summary: 标记活动开始
+      description: 不是必需打卡；拒绝未来和撤回项目，保护后台重排。
+      security: *id009
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanItem'
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: itemId
+        in: path
+        required: true
+        schema: *id008
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id008
+                baseRevision: *id011
+              required:
+              - operationId
+              - baseRevision
+  /plan-items/{itemId}/participation:
+    put:
+      operationId: putParticipation
+      summary: 保存共享参与摘要
+      description: played需至少一名本家庭陪伴者。baseRevision=0表示首次；相同首次played可合并陪伴者和按作者备注，其余冲突409；未来不能记录。
+      security: *id009
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Participation'
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: itemId
+        in: path
+        required: true
+        schema: *id008
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParticipationWrite'
+    delete:
+      operationId: deleteParticipation
+      summary: 撤销共享参与摘要
+      description: 修订必须匹配；产生participation墓碑，不撤销独立session，不吞另一家长更新；保留计划开始状态。
+      security:
+      - bearerSession: []
+      - cookieSession: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ack'
+        '400':
+          description: 参数、日期或单位不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 会话无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 角色不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不可见
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 修订、幂等或业务冲突；details含current/submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: 请求过于频繁
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂时不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: itemId
+        in: path
+        required: true
+        schema: &id012
+          type: string
+          format: uuid
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id012
+                baseRevision: &id026
+                  type: integer
+                  minimum: 0
+              required:
+              - operationId
+              - baseRevision
+  /children/{childId}/sessions:
+    post:
+      operationId: createPlaySession
+      summary: 记录临时或额外一次活动
+      description: 独立session不按活动ID去重；id防重复，addedBy从登录身份推导，不接受客户端伪造。
+      security: *id009
+      responses:
+        '201':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaySession'
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: childId
+        in: path
+        required: true
+        schema: *id008
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id008
+                id: *id008
+                planItemId:
+                  anyOf:
+                  - *id008
+                  - type: 'null'
+                localDate: *id013
+                activityId:
+                  type: string
+                  minLength: 1
+                  maxLength: 60
+                activityRevision:
+                  type: integer
+                  minimum: 1
+                participantIds:
+                  type: array
+                  items: *id008
+                  minItems: 1
+                  maxItems: 20
+                note: &id024
+                  type: string
+                  maxLength: 2000
+              required:
+              - operationId
+              - id
+              - planItemId
+              - localDate
+              - activityId
+              - activityRevision
+              - participantIds
+              - note
+  /families/{familyId}/changes:
+    get:
+      operationId: listChanges
+      summary: 增量同步含删除和撤回
+      description: 每家庭写事务锁定family_clocks后分配序号，提交前不允许后续家庭写越过；禁止裸sequence造成提交乱序漏事件。游标绑定家庭；空游标从当前可读取的最早水位开始；失效410；含成员/年龄/删除。已撤回的计划正文会遮挡，最新撤回清单随内容选项和快照返回，客户端在显示或上传前先核对。
+      security: *id009
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  changes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Change'
+                    minItems: 0
+                    maxItems: 500
+                  nextCursor:
+                    type: string
+                    minLength: 1
+                    maxLength: 4096
+                  hasMore:
+                    type: boolean
+                required:
+                - changes
+                - nextCursor
+                - hasMore
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标过期，须重新读取snapshot
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: familyId
+        in: path
+        required: true
+        schema: *id008
+      - name: cursor
+        in: query
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 4096
+        required: false
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 500
+        required: false
+  /families/{familyId}/snapshot:
+    get:
+      operationId: getFamilySnapshot
+      summary: 读取家庭一致性快照
+      description: 首次在一致性事务中建立家庭快照并绑定cursor，服务端保留不可变快照页30分钟；后续页使用不透明pageToken。过期、容量回收或内容撤回/数据删除后返回410 SNAPSHOT_EXPIRED，从第一页重来。limit（默认100）限制每页列表记录总数；每页重复family/preferences及同一cursor；只有所有页在客户端暂存完成后才原子替换已同步事实并推进cursor，待传/冲突草稿保留。权限每页重验。
+      security: *id009
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  cursor:
+                    type: string
+                    minLength: 1
+                    maxLength: 4096
+                  children:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Child'
+                    minItems: 0
+                    maxItems: 20
+                  days:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DayPlan'
+                    minItems: 0
+                    maxItems: 1000
+                  memories:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Memory'
+                    minItems: 0
+                    maxItems: 10000
+                  measurements:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Measurement'
+                    minItems: 0
+                    maxItems: 10000
+                  observations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Observation'
+                    minItems: 0
+                    maxItems: 10000
+                  sessions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PlaySession'
+                    minItems: 0
+                    maxItems: 10000
+                  books:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FamilyBook'
+                    minItems: 0
+                    maxItems: 10000
+                  media:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Media'
+                    minItems: 0
+                    maxItems: 10000
+                  withdrawals:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Withdrawal'
+                    minItems: 0
+                    maxItems: 10000
+                  family:
+                    $ref: '#/components/schemas/Family'
+                  preferences:
+                    $ref: '#/components/schemas/FamilyPreferences'
+                  snapshotId: *id012
+                  nextPageToken:
+                    anyOf:
+                    - type: string
+                      minLength: 1
+                      maxLength: 4096
+                    - type: 'null'
+                  hasMore:
+                    type: boolean
+                  expiresAt: &id036
+                    type: string
+                    format: date-time
+                required:
+                - cursor
+                - children
+                - days
+                - memories
+                - measurements
+                - observations
+                - sessions
+                - books
+                - media
+                - withdrawals
+                - family
+                - preferences
+                - snapshotId
+                - nextPageToken
+                - hasMore
+                - expiresAt
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: familyId
+        in: path
+        required: true
+        schema: *id008
+      - name: pageToken
+        in: query
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 4096
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 500
+  /children/{childId}/memories:
+    post:
+      operationId: createMemory
+      summary: 添加成长小记
+      description: first须firstConfirmed=true；日期不在未来；媒体只能引用当前家庭且归属该记录。
+      security: *id009
+      responses:
+        '201':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Memory'
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: childId
+        in: path
+        required: true
+        schema: *id008
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MemoryWrite'
+    get:
+      operationId: listMemories
+      summary: 分页查询成长历史
+      description: 分页查询成长历史
+      security:
+      - bearerSession: []
+      - cookieSession: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Memory'
+                    minItems: 0
+                    maxItems: 100
+                  nextCursor:
+                    anyOf:
+                    - type: string
+                      minLength: 1
+                      maxLength: 4096
+                    - type: 'null'
+                required:
+                - items
+                - nextCursor
+        '400':
+          description: 参数、日期或单位不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 会话无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 角色不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不可见
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 修订、幂等或业务冲突；details含current/submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: 请求过于频繁
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂时不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: childId
+        in: path
+        required: true
+        schema: *id012
+      - name: cursor
+        in: query
+        required: false
+        schema: &id016
+          type: string
+          minLength: 1
+          maxLength: 4096
+      - name: limit
+        in: query
+        required: false
+        schema: &id017
+          type: integer
+          minimum: 1
+          maximum: 100
+      - name: from
+        in: query
+        required: false
+        schema: &id014
+          type: string
+          format: date
+      - name: to
+        in: query
+        required: false
+        schema: *id014
+      - name: type
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - quote
+          - story
+          - first
+      - name: deleted
+        in: query
+        required: false
+        schema:
+          type: boolean
+  /memories/{memoryId}:
+    patch:
+      operationId: updateMemory
+      summary: 修改成长小记
+      description: 修改成长小记
+      security: *id009
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Memory'
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: memoryId
+        in: path
+        required: true
+        schema: *id008
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id008
+                localDate: *id013
+                type: &id029
+                  type: string
+                  enum:
+                  - quote
+                  - story
+                  - first
+                text: &id030
+                  type: string
+                  minLength: 1
+                  maxLength: 2000
+                firstConfirmed: &id031
+                  type: boolean
+                mediaIds: &id032
+                  type: array
+                  items: *id008
+                  minItems: 0
+                  maxItems: 20
+                baseRevision: *id011
+              required:
+              - operationId
+              - localDate
+              - type
+              - text
+              - firstConfirmed
+              - mediaIds
+              - baseRevision
+    delete:
+      operationId: deleteMemory
+      summary: 删除成长小记
+      description: soft删除30天，可恢复；permanent须明确确认，异步清理媒体与导出并记录墓碑。
+      security: *id009
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ack'
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: memoryId
+        in: path
+        required: true
+        schema: *id008
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id008
+                baseRevision: *id011
+                permanent:
+                  type: boolean
+              required:
+              - operationId
+              - baseRevision
+              - permanent
+  /children/{childId}/measurements:
+    post:
+      operationId: createMeasurement
+      summary: 添加测量事实
+      description: height单位cm且method recumbent/standing；weight单位kg且method scale。只做结构校验，无诊断或百分位。
+      security: *id009
+      responses:
+        '201':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Measurement'
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: childId
+        in: path
+        required: true
+        schema: *id008
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                id: *id008
+                localDate: *id013
+                kind: &id018
+                  type: string
+                  enum:
+                  - height
+                  - weight
+                value: &id019
+                  type: number
+                  exclusiveMinimum: 0
+                  maximum: 300
+                unit: &id020
+                  type: string
+                  enum:
+                  - cm
+                  - kg
+                method: &id021
+                  type: string
+                  enum:
+                  - recumbent
+                  - standing
+                  - scale
+                source: &id022
+                  type: string
+                  enum:
+                  - home
+                  - clinic
+                deletedAt: &id023
+                  anyOf:
+                  - *id015
+                  - type: 'null'
+                operationId: *id008
+              required:
+              - id
+              - localDate
+              - kind
+              - value
+              - unit
+              - method
+              - source
+              - deletedAt
+              - operationId
+    get:
+      operationId: listMeasurements
+      summary: 分页读取测量事实
+      description: 分页读取测量事实
+      security:
+      - bearerSession: []
+      - cookieSession: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Measurement'
+                    minItems: 0
+                    maxItems: 100
+                  nextCursor:
+                    anyOf:
+                    - type: string
+                      minLength: 1
+                      maxLength: 4096
+                    - type: 'null'
+                required:
+                - items
+                - nextCursor
+        '400':
+          description: 参数、日期或单位不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 会话无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 角色不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不可见
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 修订、幂等或业务冲突；details含current/submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: 请求过于频繁
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂时不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: childId
+        in: path
+        required: true
+        schema: *id012
+      - name: cursor
+        in: query
+        required: false
+        schema: *id016
+      - name: limit
+        in: query
+        required: false
+        schema: *id017
+      - name: from
+        in: query
+        required: false
+        schema: *id014
+      - name: to
+        in: query
+        required: false
+        schema: *id014
+      - name: deleted
+        in: query
+        required: false
+        schema: &id025
+          type: boolean
+  /measurements/{measurementId}:
+    patch:
+      operationId: updateMeasurement
+      summary: 更正测量事实
+      description: 保留更正审计；同样校验单位/方法/日期，图表按测量方法分别显示，不将卧位和站立数据静默连成同一曲线。
+      security: *id009
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Measurement'
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: measurementId
+        in: path
+        required: true
+        schema: *id008
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                localDate: *id013
+                kind: *id018
+                value: *id019
+                unit: *id020
+                method: *id021
+                source: *id022
+                deletedAt: *id023
+                operationId: *id008
+                baseRevision: *id011
+              required:
+              - localDate
+              - kind
+              - value
+              - unit
+              - method
+              - source
+              - deletedAt
+              - operationId
+              - baseRevision
+    delete:
+      operationId: deleteMeasurement
+      summary: 删除误记的测量
+      description: 产生删除墓碑；同步后各设备移除该点，不改变其他日期事实。
+      security: *id009
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ack'
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: measurementId
+        in: path
+        required: true
+        schema: *id008
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id008
+                baseRevision: *id011
+              required:
+              - operationId
+              - baseRevision
+  /children/{childId}/observations:
+    post:
+      operationId: createObservation
+      summary: 添加阶段观察
+      description: 不计算评分，不把not_yet_observed解释为能力缺失。
+      security: *id009
+      responses:
+        '201':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Observation'
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: childId
+        in: path
+        required: true
+        schema: *id008
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                id: *id008
+                guideId: &id033
+                  type: string
+                  minLength: 1
+                  maxLength: 60
+                localDate: *id013
+                value: &id034
+                  type: string
+                  enum:
+                  - noticed
+                  - not_yet_observed
+                  - discuss
+                note: *id024
+                deletedAt: &id035
+                  anyOf:
+                  - *id015
+                  - type: 'null'
+                operationId: *id008
+              required:
+              - id
+              - guideId
+              - localDate
+              - value
+              - note
+              - deletedAt
+              - operationId
+    get:
+      operationId: listObservations
+      summary: 分页读取阶段观察
+      description: 分页读取阶段观察
+      security:
+      - bearerSession: []
+      - cookieSession: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Observation'
+                    minItems: 0
+                    maxItems: 100
+                  nextCursor:
+                    anyOf:
+                    - type: string
+                      minLength: 1
+                      maxLength: 4096
+                    - type: 'null'
+                required:
+                - items
+                - nextCursor
+        '400':
+          description: 参数、日期或单位不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 会话无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 角色不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不可见
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 修订、幂等或业务冲突；details含current/submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: 请求过于频繁
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂时不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: childId
+        in: path
+        required: true
+        schema: *id012
+      - name: cursor
+        in: query
+        required: false
+        schema: *id016
+      - name: limit
+        in: query
+        required: false
+        schema: *id017
+      - name: from
+        in: query
+        required: false
+        schema: *id014
+      - name: to
+        in: query
+        required: false
+        schema: *id014
+      - name: deleted
+        in: query
+        required: false
+        schema: *id025
+  /families/{familyId}/books:
+    get:
+      operationId: listFamilyBooks
+      summary: 读取家庭书架
+      description: 读取家庭书架
+      security: *id009
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  books:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FamilyBook'
+                    minItems: 0
+                    maxItems: 1000
+                required:
+                - books
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: familyId
+        in: path
+        required: true
+        schema: *id008
+    post:
+      operationId: createFamilyBook
+      summary: 登记家中书籍
+      description: 未知版本可登记；verified只能引用已核验全局版本，家长备注不能自动授予核验。
+      security: *id009
+      responses:
+        '201':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FamilyBook'
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: familyId
+        in: path
+        required: true
+        schema: *id008
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id008
+                title:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                editionId:
+                  anyOf:
+                  - *id008
+                  - type: 'null'
+                language:
+                  type: string
+                  minLength: 1
+                  maxLength: 60
+                note: *id024
+              required:
+              - operationId
+              - title
+              - editionId
+              - language
+              - note
+  /family-books/{bookId}:
+    patch:
+      operationId: updateFamilyBook
+      summary: 更新家庭书架备注
+      description: 更新家庭书架备注
+      security: *id009
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FamilyBook'
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: bookId
+        in: path
+        required: true
+        schema: *id008
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id008
+                baseRevision: *id011
+                note: *id024
+              required:
+              - operationId
+              - baseRevision
+              - note
+    delete:
+      operationId: deleteFamilyBook
+      summary: 移除家庭书架条目
+      description: 移除家庭书架条目
+      security:
+      - bearerSession: []
+      - cookieSession: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ack'
+        '400':
+          description: 参数、日期或单位不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 会话无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 角色不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不可见
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 修订、幂等或业务冲突；details含current/submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: 请求过于频繁
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂时不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: bookId
+        in: path
+        required: true
+        schema: *id012
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id012
+                baseRevision: *id026
+              required:
+              - operationId
+              - baseRevision
+  /content/options:
+    get:
+      operationId: getContentOptions
+      summary: 可用内容与阶段
+      description: 正式环境只返回已审核发布内容；草稿只在admin可读。来源年龄与推荐档各自明确。
+      security: *id009
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  activities:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Activity'
+                    minItems: 0
+                    maxItems: 500
+                  stageGuides:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/StageGuide'
+                    minItems: 0
+                    maxItems: 30
+                  sources:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: string
+                          minLength: 1
+                          maxLength: 60
+                        title:
+                          type: string
+                          minLength: 1
+                          maxLength: 200
+                        url:
+                          type: string
+                          format: uri
+                        verifiedOn: *id013
+                        scope:
+                          type: string
+                          minLength: 1
+                          maxLength: 500
+                      required:
+                      - id
+                      - title
+                      - url
+                      - verifiedOn
+                      - scope
+                    minItems: 0
+                    maxItems: 100
+                  withdrawals:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Withdrawal'
+                    minItems: 0
+                    maxItems: 10000
+                required:
+                - activities
+                - stageGuides
+                - sources
+                - withdrawals
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /media/uploads:
+    post:
+      operationId: createMediaUpload
+      summary: 申请私有照片上传
+      description: 当前家庭记录归属、配额、真实类型均校验；签名URL只允许指定对象和大小，返回pending不是ready。
+      security: *id009
+      responses:
+        '201':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  media:
+                    $ref: '#/components/schemas/Media'
+                  uploadUrl:
+                    type: string
+                    format: uri
+                  expiresAt: *id015
+                required:
+                - media
+                - uploadUrl
+                - expiresAt
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id008
+                memoryId: *id008
+                mime:
+                  type: string
+                  enum:
+                  - image/jpeg
+                  - image/png
+                  - image/webp
+                byteSize:
+                  type: integer
+                  minimum: 1
+                  maximum: 20971520
+                sha256:
+                  type: string
+                  pattern: ^[a-f0-9]{64}$
+              required:
+              - operationId
+              - memoryId
+              - mime
+              - byteSize
+              - sha256
+      parameters:
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+  /media/{mediaId}/complete:
+    post:
+      operationId: completeMediaUpload
+      summary: 校验已传照片并异步处理
+      description: 服务端检查大小/摘要/MIME/解码，再去EXIF并生成缩略图；成功前state=processing，失败不丢正文。
+      security: *id009
+      responses:
+        '202':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Media'
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: mediaId
+        in: path
+        required: true
+        schema: *id008
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id008
+              required:
+              - operationId
+  /media/{mediaId}:
+    get:
+      operationId: getMedia
+      summary: 读取媒体状态与限时查看链接
+      description: 每次按当前家庭成员关系验证；ready才提供短时下载链接，不公开对象路径。
+      security: *id009
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Media'
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: mediaId
+        in: path
+        required: true
+        schema: *id008
+    delete:
+      operationId: deleteMedia
+      summary: 移除照片并排入私有对象清理
+      description: 移除照片并排入私有对象清理
+      security:
+      - bearerSession: []
+      - cookieSession: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ack'
+        '400':
+          description: 参数、日期或单位不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 会话无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 角色不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不可见
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 修订、幂等或业务冲突；details含current/submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: 请求过于频繁
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂时不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: mediaId
+        in: path
+        required: true
+        schema: *id012
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id012
+              required:
+              - operationId
+  /families/{familyId}/exports:
+    post:
+      operationId: createExport
+      summary: 申请导出家庭数据
+      description: 仅owner，起止日期校验，下载15分钟有效；包含遗漏媒体清单，不静默省略。
+      security: *id009
+      responses:
+        '202':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Export'
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: familyId
+        in: path
+        required: true
+        schema: *id008
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id008
+                from: *id013
+                to: *id013
+                types:
+                  type: array
+                  items:
+                    type: string
+                    enum:
+                    - memories
+                    - measurements
+                    - sessions
+                    - plans
+                  minItems: 1
+                  maxItems: 4
+                includeMedia:
+                  type: boolean
+              required:
+              - operationId
+              - from
+              - to
+              - types
+              - includeMedia
+  /exports/{exportId}:
+    get:
+      operationId: getExport
+      summary: 查看导出并获取短期下载
+      description: 每次重新校验当前家庭owner权限，不能复用离开家庭前的导出授权。
+      security: *id009
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Export'
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: exportId
+        in: path
+        required: true
+        schema: *id008
+  /families/{familyId}:
+    delete:
+      operationId: deleteFamily
+      summary: 申请永久删除家庭
+      description: 仅owner且近期重新验证身份。立即冻结访问与新签名，异步删除数据库/媒体/导出；保留去标识删除墓碑。备份最多30天，恢复重放删除。
+      security: *id009
+      responses:
+        '202':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  jobId: *id008
+                  state:
+                    const: queued
+                required:
+                - jobId
+                - state
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: familyId
+        in: path
+        required: true
+        schema: *id008
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id008
+                confirmFamilyName:
+                  type: string
+                  minLength: 1
+                  maxLength: 80
+                reauthToken:
+                  type: string
+                  minLength: 1
+                  maxLength: 4096
+              required:
+              - operationId
+              - confirmFamilyName
+              - reauthToken
+  /admin/activities/{activityId}/revisions:
+    post:
+      operationId: createContentRevision
+      summary: 保存新活动修订草稿
+      description: 仅editor；修改已通过内容必须生成新草稿并清审核，不能修改不可变已发布正文。
+      security: *id009
+      responses:
+        '201':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentRevision'
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: activityId
+        in: path
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 60
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id008
+                baseRevision: *id011
+                activity:
+                  $ref: '#/components/schemas/Activity'
+                changeNote: *id024
+              required:
+              - operationId
+              - baseRevision
+              - activity
+              - changeNote
+  /admin/revisions/{revisionId}/submit:
+    post:
+      operationId: submitRevision
+      summary: 送审固定草稿
+      description: 仅editor；先验证schema、跨引用、材料/来源必填，状态进入in_review。
+      security: *id009
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentRevision'
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: revisionId
+        in: path
+        required: true
+        schema: *id008
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id008
+                baseRevision: *id011
+              required:
+              - operationId
+              - baseRevision
+  /admin/revisions/{revisionId}/review:
+    post:
+      operationId: reviewRevision
+      summary: 通过或退回审核
+      description: 服务端根据实际审核者与作者计算selfReviewed；客户端值只能作一致性断言。批准须四项不同检查齐全与可信证据绑定正文hash；修改正文使证据失效。
+      security: *id009
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentRevision'
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: revisionId
+        in: path
+        required: true
+        schema: *id008
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id008
+                baseRevision: *id011
+                decision:
+                  type: string
+                  enum:
+                  - approve
+                  - reject
+                checks:
+                  type: array
+                  items:
+                    type: string
+                    enum:
+                    - sources
+                    - age_safety
+                    - language
+                    - rights
+                  minItems: 0
+                  maxItems: 4
+                  uniqueItems: true
+                note: *id024
+                selfReviewed:
+                  type: boolean
+                evidenceRefs:
+                  type: array
+                  items:
+                    type: string
+                    minLength: 1
+                    maxLength: 100
+                  minItems: 0
+                  maxItems: 100
+                  uniqueItems: true
+              required:
+              - operationId
+              - baseRevision
+              - decision
+              - checks
+              - note
+              - selfReviewed
+              - evidenceRefs
+  /admin/releases:
+    post:
+      operationId: publishRelease
+      summary: 发布已通过的不可变修订集合
+      description: 事务核对固定修订、真实审读身份和证据；private_trial允许自审且不要求事先完成试玩；public需独立审阅与试玩完成。专业审阅状态如实。失败不切换活跃版本。
+      security: *id009
+      responses:
+        '201':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Release'
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id008
+                revisionIds:
+                  type: array
+                  items: *id008
+                  minItems: 1
+                  maxItems: 500
+                environment:
+                  type: string
+                  enum:
+                  - private_trial
+                  - public
+                evidenceRefs:
+                  type: array
+                  items:
+                    type: string
+                    minLength: 1
+                    maxLength: 100
+                  minItems: 1
+                  maxItems: 3000
+                  uniqueItems: true
+              required:
+              - operationId
+              - revisionIds
+              - environment
+              - evidenceRefs
+      parameters:
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+    get:
+      operationId: listContentReleases
+      summary: 读取发布历史
+      description: 读取发布历史
+      security:
+      - bearerSession: []
+      - cookieSession: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Release'
+                    minItems: 0
+                    maxItems: 100
+                  nextCursor:
+                    anyOf:
+                    - type: string
+                      minLength: 1
+                      maxLength: 4096
+                    - type: 'null'
+                required:
+                - items
+                - nextCursor
+        '400':
+          description: 参数、日期或单位不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 会话无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 角色不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不可见
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 修订、幂等或业务冲突；details含current/submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: 请求过于频繁
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂时不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: cursor
+        in: query
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 4096
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+  /admin/releases/{releaseId}/withdraw:
+    post:
+      operationId: withdrawRelease
+      summary: 撤回版本并记录影响
+      description: 仅publisher；安全撤回优先于家长锁定，发布撤回change事件；保留历史和审计。离线设备无法即时获知，联网先同步撤回。
+      security: *id009
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Release'
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: releaseId
+        in: path
+        required: true
+        schema: *id008
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id008
+                kind:
+                  type: string
+                  enum:
+                  - editorial
+                  - safety
+                reason:
+                  type: string
+                  minLength: 1
+                  maxLength: 1000
+              required:
+              - operationId
+              - kind
+              - reason
+  /sessions/reauth:
+    post:
+      operationId: reauthenticateSession
+      summary: 为删除等敏感操作重新验证身份
+      description: 限速；短期凭据绑定本人、设备与敏感操作范围，5分钟有效，成功后单次消费。
+      security: *id009
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  reauthToken:
+                    type: string
+                    minLength: 1
+                    maxLength: 4096
+                  expiresAt: *id015
+                required:
+                - reauthToken
+                - expiresAt
+        '400': *id001
+        '401': *id002
+        '403': *id003
+        '404': *id004
+        '409': *id005
+        '429': *id006
+        '503': *id007
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                password:
+                  type: string
+                  minLength: 1
+                  maxLength: 256
+              required:
+              - password
+      parameters:
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+  /sessions/csrf:
+    get:
+      operationId: getSessionCsrf
+      summary: 读取当前Web会话CSRF令牌
+      description: 仅同源Web会话读取；令牌绑定会话，写请求用X-CSRF-Token；CORS不允许任意带凭证来源。
+      security:
+      - bearerSession: []
+      - cookieSession: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  csrfToken:
+                    type: string
+                    minLength: 1
+                    maxLength: 256
+                required:
+                - csrfToken
+        '400':
+          description: 参数、日期或单位不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 会话无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 角色不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不可见
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 修订、幂等或业务冲突；details含current/submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: 请求过于频繁
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂时不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /families/{familyId}/preferences:
+    get:
+      operationId: getFamilyPreferences
+      summary: 读取家庭资源与语言偏好
+      description: 读取家庭资源与语言偏好
+      security:
+      - bearerSession: []
+      - cookieSession: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FamilyPreferences'
+        '400':
+          description: 参数、日期或单位不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 会话无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 角色不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不可见
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 修订、幂等或业务冲突；details含current/submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: 请求过于频繁
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂时不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: familyId
+        in: path
+        required: true
+        schema: *id012
+    put:
+      operationId: putFamilyPreferences
+      summary: 更新家庭资源与语言偏好
+      description: 默认材料列表为空（未知，不代表已拥有），languageMode=zh_with_english；偏好变更不覆盖已开展或锁定项目。
+      security:
+      - bearerSession: []
+      - cookieSession: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FamilyPreferences'
+        '400':
+          description: 参数、日期或单位不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 会话无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 角色不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不可见
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 修订、幂等或业务冲突；details含current/submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: 请求过于频繁
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂时不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: familyId
+        in: path
+        required: true
+        schema: *id012
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                availableMaterials:
+                  type: array
+                  items:
+                    type: string
+                    minLength: 1
+                    maxLength: 150
+                  minItems: 0
+                  maxItems: 200
+                  uniqueItems: true
+                excludedMaterials:
+                  type: array
+                  items:
+                    type: string
+                    minLength: 1
+                    maxLength: 150
+                  minItems: 0
+                  maxItems: 200
+                  uniqueItems: true
+                languageMode:
+                  type: string
+                  enum:
+                  - zh
+                  - zh_with_english
+                operationId: *id012
+                baseRevision: *id026
+              required:
+              - availableMaterials
+              - excludedMaterials
+              - languageMode
+              - operationId
+              - baseRevision
+  /users/me/reminder:
+    get:
+      operationId: getReminderPreference
+      summary: 读取本人指定提醒设备
+      description: 读取本人指定提醒设备
+      security:
+      - bearerSession: []
+      - cookieSession: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReminderPreference'
+        '400':
+          description: 参数、日期或单位不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 会话无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 角色不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不可见
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 修订、幂等或业务冲突；details含current/submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: 请求过于频繁
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂时不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      operationId: putReminderPreference
+      summary: 选择本人提醒设备与时刻
+      description: deviceId必须属于本人活跃会话；默认关闭，建议16:00；禁用时可清空设备。客户端恢复前台先刷新资格，旧设备离线不能即时获知切换；权限由Android系统决定。
+      security:
+      - bearerSession: []
+      - cookieSession: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReminderPreference'
+        '400':
+          description: 参数、日期或单位不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 会话无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 角色不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不可见
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 修订、幂等或业务冲突；details含current/submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: 请求过于频繁
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂时不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id012
+                baseRevision: *id026
+                deviceId:
+                  anyOf:
+                  - *id012
+                  - type: 'null'
+                enabled:
+                  type: boolean
+                localTime:
+                  type: string
+                  pattern: ^[01][0-9]:[0-5][0-9]$
+              required:
+              - operationId
+              - baseRevision
+              - deviceId
+              - enabled
+              - localTime
+      parameters:
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+  /plan-items/{itemId}/protection:
+    put:
+      operationId: setPlanItemProtection
+      summary: 调整项目开始与保留状态
+      description: 浏览详情不标记开始；明确开始动作才保护。已有参与或独立session时不得清started；安全撤回优先于保留。
+      security:
+      - bearerSession: []
+      - cookieSession: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanItem'
+        '400':
+          description: 参数、日期或单位不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 会话无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 角色不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不可见
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 修订、幂等或业务冲突；details含current/submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: 请求过于频繁
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂时不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: itemId
+        in: path
+        required: true
+        schema: *id012
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id012
+                baseRevision: *id026
+                lockedByParent:
+                  type: boolean
+                clearStarted:
+                  type: boolean
+              required:
+              - operationId
+              - baseRevision
+              - lockedByParent
+              - clearStarted
+  /memories/{memoryId}/restore:
+    post:
+      operationId: restoreMemory
+      summary: 恢复回收期内成长记录
+      description: 仅软删30天内可恢复；重新验证家庭范围和修订；永久删除不可恢复。
+      security:
+      - bearerSession: []
+      - cookieSession: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Memory'
+        '400':
+          description: 参数、日期或单位不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 会话无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 角色不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不可见
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 修订、幂等或业务冲突；details含current/submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: 请求过于频繁
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂时不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: memoryId
+        in: path
+        required: true
+        schema: *id012
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id012
+                baseRevision: *id026
+              required:
+              - operationId
+              - baseRevision
+  /measurements/{measurementId}/restore:
+    post:
+      operationId: restoreMeasurement
+      summary: 恢复回收期内测量事实
+      description: 仅软删30天内可恢复；重新验证家庭范围和修订；跨家庭返回404。
+      security:
+      - bearerSession: []
+      - cookieSession: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Measurement'
+        '400':
+          description: 参数、日期或单位不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 会话无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 角色不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不可见
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 修订、幂等或业务冲突；details含current/submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: 请求过于频繁
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂时不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: measurementId
+        in: path
+        required: true
+        schema: *id012
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id012
+                baseRevision: *id026
+              required:
+              - operationId
+              - baseRevision
+  /observations/{observationId}:
+    patch:
+      operationId: updateObservation
+      summary: 更正阶段观察
+      description: 更正阶段观察
+      security:
+      - bearerSession: []
+      - cookieSession: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Observation'
+        '400':
+          description: 参数、日期或单位不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 会话无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 角色不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不可见
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 修订、幂等或业务冲突；details含current/submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: 请求过于频繁
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂时不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: observationId
+        in: path
+        required: true
+        schema: *id012
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                guideId:
+                  type: string
+                  minLength: 1
+                  maxLength: 60
+                localDate:
+                  type: string
+                  format: date
+                value:
+                  type: string
+                  enum:
+                  - noticed
+                  - not_yet_observed
+                  - discuss
+                note:
+                  type: string
+                  maxLength: 2000
+                deletedAt:
+                  anyOf:
+                  - type: string
+                    format: date-time
+                  - type: 'null'
+                operationId: *id012
+                baseRevision: *id026
+              required:
+              - guideId
+              - localDate
+              - value
+              - note
+              - deletedAt
+              - operationId
+              - baseRevision
+    delete:
+      operationId: deleteObservation
+      summary: 删除误记的阶段观察
+      description: 删除误记的阶段观察
+      security:
+      - bearerSession: []
+      - cookieSession: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ack'
+        '400':
+          description: 参数、日期或单位不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 会话无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 角色不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不可见
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 修订、幂等或业务冲突；details含current/submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: 请求过于频繁
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂时不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: observationId
+        in: path
+        required: true
+        schema: *id012
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id012
+                baseRevision: *id026
+              required:
+              - operationId
+              - baseRevision
+  /observations/{observationId}/restore:
+    post:
+      operationId: restoreObservation
+      summary: 恢复回收期内阶段观察
+      description: 仅软删30天内可恢复；重新验证家庭范围和修订；跨家庭返回404。
+      security:
+      - bearerSession: []
+      - cookieSession: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Observation'
+        '400':
+          description: 参数、日期或单位不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 会话无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 角色不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不可见
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 修订、幂等或业务冲突；details含current/submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: 请求过于频繁
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂时不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: observationId
+        in: path
+        required: true
+        schema: *id012
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id012
+                baseRevision: *id026
+              required:
+              - operationId
+              - baseRevision
+  /jobs/{jobId}:
+    get:
+      operationId: getJob
+      summary: 查询本人发起的后台任务状态
+      description: 校验任务发起者和适用家庭权限；家庭冻结后仅删除任务发起者可读取该删除任务，不开放家庭资料。
+      security:
+      - bearerSession: []
+      - cookieSession: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+        '400':
+          description: 参数、日期或单位不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 会话无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 角色不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不可见
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 修订、幂等或业务冲突；details含current/submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: 请求过于频繁
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂时不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: jobId
+        in: path
+        required: true
+        schema: *id012
+  /admin/revisions:
+    get:
+      operationId: listContentRevisions
+      summary: 查询内容修订与审核队列
+      description: 查询内容修订与审核队列
+      security:
+      - bearerSession: []
+      - cookieSession: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ContentRevision'
+                    minItems: 0
+                    maxItems: 100
+                  nextCursor:
+                    anyOf:
+                    - type: string
+                      minLength: 1
+                      maxLength: 4096
+                    - type: 'null'
+                required:
+                - items
+                - nextCursor
+        '400':
+          description: 参数、日期或单位不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 会话无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 角色不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不可见
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 修订、幂等或业务冲突；details含current/submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: 请求过于频繁
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂时不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: cursor
+        in: query
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 4096
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - draft
+          - in_review
+          - approved
+          - published
+          - withdrawn
+  /admin/revisions/{revisionId}:
+    get:
+      operationId: getContentRevision
+      summary: 读取固定内容修订
+      description: 读取固定内容修订
+      security:
+      - bearerSession: []
+      - cookieSession: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentRevision'
+        '400':
+          description: 参数、日期或单位不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 会话无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 角色不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不可见
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 修订、幂等或业务冲突；details含current/submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: 请求过于频繁
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂时不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: revisionId
+        in: path
+        required: true
+        schema: *id012
+  /admin/sources:
+    get:
+      operationId: listContentSources
+      summary: 读取审读来源
+      description: 读取审读来源
+      security:
+      - bearerSession: []
+      - cookieSession: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  sources:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: string
+                          minLength: 1
+                          maxLength: 60
+                        title:
+                          type: string
+                          minLength: 1
+                          maxLength: 200
+                        url:
+                          type: string
+                          format: uri
+                        verifiedOn:
+                          type: string
+                          format: date
+                        scope:
+                          type: string
+                          minLength: 1
+                          maxLength: 500
+                      required:
+                      - id
+                      - title
+                      - url
+                      - verifiedOn
+                      - scope
+                    minItems: 0
+                    maxItems: 100
+                required:
+                - sources
+        '400':
+          description: 参数、日期或单位不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 会话无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 角色不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不可见
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 修订、幂等或业务冲突；details含current/submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: 请求过于频繁
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂时不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /admin/releases/{releaseId}:
+    get:
+      operationId: getContentRelease
+      summary: 读取固定发布版本
+      description: 读取固定发布版本
+      security:
+      - bearerSession: []
+      - cookieSession: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Release'
+        '400':
+          description: 参数、日期或单位不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 会话无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 角色不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不可见
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 修订、幂等或业务冲突；details含current/submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: 请求过于频繁
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂时不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: releaseId
+        in: path
+        required: true
+        schema: *id012
+  /admin/evidence:
+    post:
+      operationId: createReviewEvidence
+      summary: 登记真实内容审读证据
+      description: 仅reviewer；actorId必须是当前实际审读身份，服务端绑定作者/hash并核对原始证据引用，不接受伪造他人或AI自称human的自动批准。
+      security:
+      - bearerSession: []
+      - cookieSession: []
+      responses:
+        '201':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewEvidence'
+        '400':
+          description: 参数、日期或单位不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 会话无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 角色不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不可见
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 修订、幂等或业务冲突；details含current/submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: 请求过于频繁
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂时不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                operationId: *id012
+                record:
+                  $ref: '#/components/schemas/ReviewEvidence'
+              required:
+              - operationId
+              - record
+      parameters:
+      - name: X-CSRF-Token
+        in: header
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description: 使用Web Cookie时必填且须同源；Bearer手机请求不需要。
+  /admin/evidence/{evidenceId}:
+    get:
+      operationId: getReviewEvidence
+      summary: 读取固定审读证据
+      description: 读取固定审读证据
+      security:
+      - bearerSession: []
+      - cookieSession: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewEvidence'
+        '400':
+          description: 参数、日期或单位不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 会话无效
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: 角色不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不可见
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: 修订、幂等或业务冲突；details含current/submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: 请求过于频繁
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: 暂时不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: 游标或快照过期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: 媒体或请求过大
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: 业务或内容校验失败
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: evidenceId
+        in: path
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 100
+components:
+  securitySchemes:
+    bearerSession:
+      type: http
+      scheme: bearer
+    cookieSession:
+      type: apiKey
+      in: cookie
+      name: bp_session
+    refreshCookie:
+      type: apiKey
+      in: cookie
+      name: bp_refresh
+    refreshHeader:
+      type: apiKey
+      in: header
+      name: X-Refresh-Token
+  schemas:
+    Error:
+      type: object
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 80
+        message:
+          type: string
+          minLength: 1
+          maxLength: 500
+        requestId: *id008
+        details:
+          oneOf:
+          - $ref: '#/components/schemas/ConflictDetails'
+          - type: object
+            not:
+              required:
+              - currentRevision
+            additionalProperties: true
+      required:
+      - code
+      - message
+      - requestId
+    WriteMeta:
+      type: object
+      additionalProperties: false
+      properties:
+        operationId: *id008
+        baseRevision: *id011
+      required:
+      - operationId
+      - baseRevision
+    Ack:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id008
+        revision: *id011
+        changeSeq:
+          type: integer
+          minimum: 0
+      required:
+      - id
+      - revision
+      - changeSeq
+    User:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id008
+        displayName:
+          anyOf:
+          - type: string
+            minLength: 1
+            maxLength: 60
+          - type: 'null'
+      required:
+      - id
+      - displayName
+    Member:
+      type: object
+      additionalProperties: false
+      properties:
+        userId: *id008
+        role:
+          type: string
+          enum:
+          - owner
+          - caregiver
+        active:
+          type: boolean
+        displayName:
+          anyOf:
+          - type: string
+            minLength: 1
+            maxLength: 60
+          - type: 'null'
+        familyId: *id012
+        revision: *id026
+      required:
+      - userId
+      - role
+      - active
+      - displayName
+      - familyId
+      - revision
+    Family:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id008
+        name:
+          type: string
+          minLength: 1
+          maxLength: 80
+        timezone:
+          type: string
+          minLength: 1
+          maxLength: 100
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/Member'
+          minItems: 1
+          maxItems: 20
+        revision: *id026
+      required:
+      - id
+      - name
+      - timezone
+      - members
+      - revision
+    Child:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id008
+        familyId: *id008
+        displayName:
+          anyOf:
+          - type: string
+            minLength: 1
+            maxLength: 60
+          - type: 'null'
+        ageMode:
+          type: string
+          enum:
+          - months
+          - birthDate
+        ageMonths:
+          anyOf:
+          - type: integer
+            minimum: 0
+            maximum: 36
+          - type: 'null'
+        ageAsOf:
+          anyOf:
+          - *id013
+          - type: 'null'
+        birthDate:
+          anyOf:
+          - *id013
+          - type: 'null'
+        revision: *id011
+      required:
+      - id
+      - familyId
+      - displayName
+      - ageMode
+      - ageMonths
+      - ageAsOf
+      - birthDate
+      - revision
+    AgeInput:
+      type: object
+      additionalProperties: false
+      properties:
+        ageMode:
+          type: string
+          enum:
+          - months
+          - birthDate
+        ageMonths:
+          anyOf:
+          - type: integer
+            minimum: 0
+            maximum: 36
+          - type: 'null'
+        ageAsOf:
+          anyOf:
+          - *id013
+          - type: 'null'
+        birthDate:
+          anyOf:
+          - *id013
+          - type: 'null'
+        displayName:
+          anyOf:
+          - type: string
+            minLength: 1
+            maxLength: 60
+          - type: 'null'
+      required:
+      - ageMode
+      - ageMonths
+      - ageAsOf
+      - birthDate
+      - displayName
+    Activity:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 60
+        revision:
+          type: integer
+          minimum: 1
+        title:
+          type: string
+          minLength: 1
+          maxLength: 60
+        kind: &id028
+          type: string
+          enum:
+          - movement
+          - explore
+          - reading
+          - english
+          - child-led
+          - calm
+        ageBands:
+          type: array
+          items: &id027
+            type: string
+            enum:
+            - m12_14
+            - m15_17
+            - m18_23
+            - m24_29
+            - m30_35
+            - m36
+          minItems: 1
+          maxItems: 6
+        support:
+          type: string
+          minLength: 1
+          maxLength: 300
+        materials:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 150
+          minItems: 0
+          maxItems: 12
+        steps:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 400
+          minItems: 1
+          maxItems: 5
+        dialogue:
+          type: object
+          additionalProperties: false
+          properties:
+            opening:
+              type: string
+              minLength: 1
+              maxLength: 300
+            engaged:
+              type: string
+              minLength: 1
+              maxLength: 300
+            observing:
+              type: string
+              minLength: 1
+              maxLength: 300
+            stopping:
+              type: string
+              minLength: 1
+              maxLength: 300
+          required:
+          - opening
+          - engaged
+          - observing
+          - stopping
+        english:
+          type: object
+          additionalProperties: false
+          properties:
+            phrase:
+              type: string
+              minLength: 1
+              maxLength: 200
+            meaning:
+              type: string
+              minLength: 1
+              maxLength: 200
+            when:
+              type: string
+              minLength: 1
+              maxLength: 300
+          required:
+          - phrase
+          - meaning
+          - when
+        easier:
+          type: string
+          minLength: 1
+          maxLength: 300
+        next:
+          type: string
+          minLength: 1
+          maxLength: 300
+        safety:
+          type: string
+          minLength: 1
+          maxLength: 700
+        sourceIds:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 60
+          minItems: 1
+          maxItems: 10
+        reviewState:
+          type: string
+          enum:
+          - draft
+          - reviewed
+        rights:
+          type: string
+          enum:
+          - original
+          - licensed
+        withdrawn:
+          type: boolean
+      required:
+      - id
+      - revision
+      - title
+      - kind
+      - ageBands
+      - support
+      - materials
+      - steps
+      - dialogue
+      - english
+      - easier
+      - next
+      - safety
+      - sourceIds
+      - reviewState
+      - rights
+      - withdrawn
+    StageGuide:
+      type: object
+      additionalProperties: false
+      properties:
+        ageBand: *id027
+        title:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          minLength: 1
+          maxLength: 500
+        sourceId:
+          type: string
+          minLength: 1
+          maxLength: 60
+        sourceAgeMonths:
+          type: integer
+          enum:
+          - 12
+          - 15
+          - 18
+          - 24
+          - 30
+          - 36
+        focuses:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              id:
+                type: string
+                minLength: 1
+                maxLength: 60
+              domain:
+                type: string
+                minLength: 1
+                maxLength: 60
+              title:
+                type: string
+                minLength: 1
+                maxLength: 100
+              everyday:
+                type: string
+                minLength: 1
+                maxLength: 400
+              support:
+                type: string
+                minLength: 1
+                maxLength: 400
+              easier:
+                type: string
+                minLength: 1
+                maxLength: 300
+              next:
+                type: string
+                minLength: 1
+                maxLength: 300
+              cardIds:
+                type: array
+                items:
+                  type: string
+                  minLength: 1
+                  maxLength: 60
+                minItems: 0
+                maxItems: 10
+            required:
+            - id
+            - domain
+            - title
+            - everyday
+            - support
+            - easier
+            - next
+            - cardIds
+          minItems: 1
+          maxItems: 10
+      required:
+      - ageBand
+      - title
+      - description
+      - sourceId
+      - sourceAgeMonths
+      - focuses
+    FamilyBook:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id008
+        familyId: *id008
+        title:
+          type: string
+          minLength: 1
+          maxLength: 100
+        editionId:
+          anyOf:
+          - *id008
+          - type: 'null'
+        editionStatus:
+          type: string
+          enum:
+          - unverified
+          - verified
+        language:
+          type: string
+          minLength: 1
+          maxLength: 60
+        note: *id024
+        revision: *id011
+      required:
+      - id
+      - familyId
+      - title
+      - editionId
+      - editionStatus
+      - language
+      - note
+      - revision
+    PlanItem:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id008
+        dayPlanId: *id008
+        kind: *id028
+        block:
+          type: string
+          enum:
+          - before
+          - after
+          - bedtime
+        position:
+          type: integer
+          minimum: 0
+        budgetMinutes:
+          type: integer
+          minimum: 1
+          maximum: 60
+        snapshot:
+          $ref: '#/components/schemas/Activity'
+        lockedByParent:
+          type: boolean
+        startedAt:
+          anyOf:
+          - *id015
+          - type: 'null'
+        revision: *id011
+        reasonCodes:
+          type: array
+          items:
+            type: string
+            enum:
+            - AVAILABLE_AT_HOME
+            - FAMILIAR_FAVORITE
+            - WEEK_VARIETY
+            - AGE_MATCH
+          minItems: 1
+          maxItems: 4
+        blockedByWithdrawal:
+          type: boolean
+        participation:
+          anyOf:
+          - $ref: '#/components/schemas/Participation'
+          - type: 'null'
+        visibility:
+          type: string
+          enum:
+          - active
+          - hidden
+        withdrawalReason:
+          type: string
+          minLength: 1
+          maxLength: 1000
+      required:
+      - id
+      - dayPlanId
+      - kind
+      - block
+      - position
+      - budgetMinutes
+      - snapshot
+      - lockedByParent
+      - startedAt
+      - revision
+      - reasonCodes
+      - blockedByWithdrawal
+      - participation
+      - visibility
+    DayPlan:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id008
+        familyId: *id008
+        childId: *id008
+        localDate: *id013
+        timezone:
+          type: string
+          minLength: 1
+          maxLength: 100
+        mode:
+          type: string
+          enum:
+          - standard
+          - lite
+        generationVersion:
+          type: string
+          minLength: 1
+          maxLength: 60
+        revision: *id011
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanItem'
+          minItems: 0
+          maxItems: 12
+        missingSlots:
+          type: array
+          items: *id028
+          minItems: 0
+          maxItems: 6
+        effectiveBudgetMinutes:
+          type: integer
+          minimum: 0
+          maximum: 720
+      required:
+      - id
+      - familyId
+      - childId
+      - localDate
+      - timezone
+      - mode
+      - generationVersion
+      - revision
+      - items
+      - missingSlots
+      - effectiveBudgetMinutes
+    Participation:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id008
+        planItemId: *id008
+        status:
+          type: string
+          enum:
+          - played
+          - skipped
+        participantIds:
+          type: array
+          items: *id008
+          minItems: 0
+          maxItems: 20
+        notes:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              authorId: *id008
+              text: *id024
+            required:
+            - authorId
+            - text
+          minItems: 0
+          maxItems: 20
+        actualMinutes:
+          anyOf:
+          - type: integer
+            minimum: 0
+            maximum: 1440
+          - type: 'null'
+        again:
+          type: boolean
+        addedBy: *id008
+        revision: *id011
+      required:
+      - id
+      - planItemId
+      - status
+      - participantIds
+      - notes
+      - actualMinutes
+      - again
+      - addedBy
+      - revision
+    ParticipationWrite:
+      type: object
+      additionalProperties: false
+      properties:
+        operationId: *id008
+        baseRevision: *id011
+        status:
+          type: string
+          enum:
+          - played
+          - skipped
+        participantIds:
+          type: array
+          items: *id008
+          minItems: 0
+          maxItems: 20
+        note: *id024
+        actualMinutes:
+          anyOf:
+          - type: integer
+            minimum: 0
+            maximum: 1440
+          - type: 'null'
+        again:
+          type: boolean
+      required:
+      - operationId
+      - baseRevision
+      - status
+      - participantIds
+      - note
+      - actualMinutes
+      - again
+    Memory:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id008
+        childId: *id008
+        localDate: *id013
+        type:
+          type: string
+          enum:
+          - quote
+          - story
+          - first
+        text:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        firstConfirmed:
+          type: boolean
+        mediaIds:
+          type: array
+          items: *id008
+          minItems: 0
+          maxItems: 20
+        addedBy: *id008
+        revision: *id011
+        deletedAt:
+          anyOf:
+          - *id015
+          - type: 'null'
+      required:
+      - id
+      - childId
+      - localDate
+      - type
+      - text
+      - firstConfirmed
+      - mediaIds
+      - addedBy
+      - revision
+      - deletedAt
+    MemoryWrite:
+      type: object
+      additionalProperties: false
+      properties:
+        operationId: *id008
+        id: *id008
+        localDate: *id013
+        type: *id029
+        text: *id030
+        firstConfirmed: *id031
+        mediaIds: *id032
+      required:
+      - operationId
+      - id
+      - localDate
+      - type
+      - text
+      - firstConfirmed
+      - mediaIds
+    Measurement:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id008
+        childId: *id008
+        localDate: *id013
+        kind: *id018
+        value: *id019
+        unit: *id020
+        method: *id021
+        source: *id022
+        revision: *id011
+        deletedAt: *id023
+      required:
+      - id
+      - childId
+      - localDate
+      - kind
+      - value
+      - unit
+      - method
+      - source
+      - revision
+      - deletedAt
+    Observation:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id008
+        guideId: *id033
+        childId: *id008
+        localDate: *id013
+        value: *id034
+        note: *id024
+        revision: *id011
+        deletedAt: *id035
+      required:
+      - id
+      - guideId
+      - childId
+      - localDate
+      - value
+      - note
+      - revision
+      - deletedAt
+    PlaySession:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id008
+        childId: *id008
+        planItemId:
+          anyOf:
+          - *id008
+          - type: 'null'
+        localDate: *id013
+        activityId:
+          type: string
+          minLength: 1
+          maxLength: 60
+        activityRevision:
+          type: integer
+          minimum: 1
+        participantIds:
+          type: array
+          items: *id008
+          minItems: 1
+          maxItems: 20
+        note: *id024
+        addedBy: *id008
+        revision: *id011
+      required:
+      - id
+      - childId
+      - planItemId
+      - localDate
+      - activityId
+      - activityRevision
+      - participantIds
+      - note
+      - addedBy
+      - revision
+    Media:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id008
+        memoryId: *id008
+        state:
+          type: string
+          enum:
+          - pending
+          - processing
+          - ready
+          - failed
+          - deleted
+        mime:
+          type: string
+          enum:
+          - image/jpeg
+          - image/png
+          - image/webp
+        byteSize:
+          type: integer
+          minimum: 1
+          maximum: 20971520
+        sha256:
+          type: string
+          pattern: ^[a-f0-9]{64}$
+        downloadUrl:
+          anyOf:
+          - type: string
+            format: uri
+          - type: 'null'
+        expiresAt:
+          anyOf:
+          - *id015
+          - type: 'null'
+      required:
+      - id
+      - memoryId
+      - state
+      - mime
+      - byteSize
+      - sha256
+      - downloadUrl
+      - expiresAt
+    Export:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id008
+        status:
+          type: string
+          enum:
+          - queued
+          - running
+          - ready
+          - failed
+          - expired
+        downloadUrl:
+          anyOf:
+          - type: string
+            format: uri
+          - type: 'null'
+        expiresAt:
+          anyOf:
+          - *id015
+          - type: 'null'
+        missingMedia:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              mediaId: *id008
+              reason:
+                type: string
+                minLength: 1
+                maxLength: 150
+            required:
+            - mediaId
+            - reason
+          minItems: 0
+          maxItems: 10000
+      required:
+      - id
+      - status
+      - downloadUrl
+      - expiresAt
+      - missingMedia
+    Change:
+      type: object
+      additionalProperties: false
+      properties:
+        sequence:
+          type: integer
+          minimum: 1
+        entity:
+          type: string
+          enum:
+          - day_plan
+          - participation
+          - session
+          - memory
+          - measurement
+          - observation
+          - family_book
+          - media
+          - withdrawal
+          - family
+          - member
+          - child
+          - family_preferences
+          - plan_item
+        id: *id008
+        revision: *id011
+        deleted:
+          type: boolean
+        payload:
+          anyOf:
+          - oneOf:
+            - $ref: '#/components/schemas/DayPlan'
+            - $ref: '#/components/schemas/Participation'
+            - $ref: '#/components/schemas/PlaySession'
+            - $ref: '#/components/schemas/Memory'
+            - $ref: '#/components/schemas/Measurement'
+            - $ref: '#/components/schemas/Observation'
+            - $ref: '#/components/schemas/FamilyBook'
+            - $ref: '#/components/schemas/Media'
+            - $ref: '#/components/schemas/Withdrawal'
+            - $ref: '#/components/schemas/Family'
+            - $ref: '#/components/schemas/Member'
+            - $ref: '#/components/schemas/Child'
+            - $ref: '#/components/schemas/FamilyPreferences'
+            - $ref: '#/components/schemas/PlanItem'
+          - type: 'null'
+      required:
+      - sequence
+      - entity
+      - id
+      - revision
+      - deleted
+      - payload
+    Withdrawal:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id008
+        activityId:
+          type: string
+          minLength: 1
+          maxLength: 60
+        revision:
+          type: integer
+          minimum: 1
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        kind:
+          type: string
+          enum:
+          - editorial
+          - safety
+        effectiveAt: *id015
+      required:
+      - id
+      - activityId
+      - revision
+      - reason
+      - kind
+      - effectiveAt
+    ContentRevision:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id008
+        activity:
+          $ref: '#/components/schemas/Activity'
+        status:
+          type: string
+          enum:
+          - draft
+          - in_review
+          - approved
+          - published
+          - withdrawn
+        revision: *id011
+        changeNote: *id024
+        contentHash: &id037
+          type: string
+          pattern: ^[a-f0-9]{64}$
+        authorId: *id012
+        evidenceRefs:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 100
+          minItems: 0
+          maxItems: 100
+          uniqueItems: true
+      required:
+      - id
+      - activity
+      - status
+      - revision
+      - changeNote
+      - contentHash
+      - authorId
+      - evidenceRefs
+    Release:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id008
+        version:
+          type: integer
+          minimum: 1
+        revisionIds:
+          type: array
+          items: *id008
+          minItems: 1
+          maxItems: 500
+        state:
+          type: string
+          enum:
+          - published
+          - withdrawn
+        selfReviewed:
+          type: boolean
+        publishedAt: *id015
+        environment:
+          type: string
+          enum:
+          - private_trial
+          - public
+        active:
+          type: boolean
+        evidenceRefs:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 100
+          minItems: 1
+          maxItems: 3000
+          uniqueItems: true
+      required:
+      - id
+      - version
+      - revisionIds
+      - state
+      - selfReviewed
+      - publishedAt
+      - environment
+      - active
+      - evidenceRefs
+    SessionResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        sessionId: *id012
+        accessToken:
+          anyOf:
+          - type: string
+            minLength: 1
+            maxLength: 4096
+          - type: 'null'
+        refreshToken:
+          anyOf:
+          - type: string
+            minLength: 1
+            maxLength: 4096
+          - type: 'null'
+        expiresAt: *id036
+        refreshExpiresAt: *id036
+        csrfToken:
+          anyOf:
+          - type: string
+            minLength: 1
+            maxLength: 256
+          - type: 'null'
+      required:
+      - user
+      - sessionId
+      - accessToken
+      - refreshToken
+      - expiresAt
+      - refreshExpiresAt
+      - csrfToken
+      description: mobile返回两种令牌且csrfToken=null；web令牌字段均null，令牌只通过HttpOnly Cookie交付。访问15分钟、刷新30天。刷新每次轮转，旧令牌复用撤销同一会话令牌家族。
+    FamilyPreferences:
+      type: object
+      additionalProperties: false
+      properties:
+        familyId: *id012
+        availableMaterials:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 150
+          minItems: 0
+          maxItems: 200
+          uniqueItems: true
+        excludedMaterials:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 150
+          minItems: 0
+          maxItems: 200
+          uniqueItems: true
+        languageMode:
+          type: string
+          enum:
+          - zh
+          - zh_with_english
+        revision: *id026
+      required:
+      - familyId
+      - availableMaterials
+      - excludedMaterials
+      - languageMode
+      - revision
+    ReminderPreference:
+      type: object
+      additionalProperties: false
+      properties:
+        userId: *id012
+        deviceId:
+          anyOf:
+          - *id012
+          - type: 'null'
+        enabled:
+          type: boolean
+        localTime:
+          type: string
+          pattern: ^([01][0-9]|2[0-3]):[0-5][0-9]$
+        revision: *id026
+      required:
+      - userId
+      - deviceId
+      - enabled
+      - localTime
+      - revision
+    ConflictDetails:
+      type: object
+      additionalProperties: false
+      properties:
+        entity:
+          type: string
+          minLength: 1
+          maxLength: 60
+        id: *id012
+        currentRevision: *id026
+        current:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+        submitted:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+        allowedActions:
+          type: array
+          items:
+            type: string
+            enum:
+            - reload
+            - merge
+            - keep_local
+            - keep_remote
+            - save_copy
+          minItems: 1
+          maxItems: 5
+          uniqueItems: true
+      required:
+      - entity
+      - id
+      - currentRevision
+      - current
+      - submitted
+      - allowedActions
+    Job:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id012
+        type:
+          type: string
+          enum:
+          - family_delete
+          - media_delete
+          - export
+        state:
+          type: string
+          enum:
+          - queued
+          - running
+          - ready
+          - failed
+        errorCode:
+          anyOf:
+          - type: string
+            minLength: 1
+            maxLength: 80
+          - type: 'null'
+      required:
+      - id
+      - type
+      - state
+      - errorCode
+    ReviewEvidence:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 100
+        kind:
+          type: string
+          enum:
+          - editorial_review
+          - expert_review
+          - family_trial
+          - rights_license
+        cardId:
+          type: string
+          minLength: 1
+          maxLength: 60
+        revision:
+          type: integer
+          minimum: 1
+        contentHash: *id037
+        actorId:
+          type: string
+          minLength: 1
+          maxLength: 100
+        actorKind:
+          const: human
+        createdAt: *id036
+        decision:
+          type: string
+          enum:
+          - approved
+          - rejected
+        evidenceRef:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        authorId:
+          type: string
+          minLength: 1
+          maxLength: 100
+        selfReviewed:
+          type: boolean
+        checks:
+          type: array
+          items:
+            type: string
+            enum:
+            - sources
+            - age_safety
+            - language
+            - rights
+          minItems: 4
+          maxItems: 4
+          uniqueItems: true
+        qualificationRef:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        completedAt: *id036
+        authorizationRef:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        scope:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        allowedEnvironments:
+          type: array
+          items:
+            type: string
+            enum:
+            - private_trial
+            - public
+          minItems: 1
+          maxItems: 2
+          uniqueItems: true
+      required:
+      - id
+      - kind
+      - cardId
+      - revision
+      - contentHash
+      - actorId
+      - actorKind
+      - createdAt
+      - decision
+      - evidenceRef
+      allOf:
+      - if:
+          properties:
+            kind:
+              const: editorial_review
+        then:
+          required:
+          - authorId
+          - selfReviewed
+          - checks
+      - if:
+          properties:
+            kind:
+              const: expert_review
+        then:
+          required:
+          - authorId
+          - selfReviewed
+          - qualificationRef
+      - if:
+          properties:
+            kind:
+              const: family_trial
+        then:
+          required:
+          - completedAt
+      - if:
+          properties:
+            kind:
+              const: rights_license
+        then:
+          required:
+          - authorizationRef
+          - scope
+          - allowedEnvironments

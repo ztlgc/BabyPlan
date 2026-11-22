@@ -1,0 +1,20 @@
+{
+  "checkedOn": "2026-11-13",
+  "taskCount": 44,
+  "phaseCount": 7,
+  "taskDetailsToggle": true,
+  "expandedWidths": [
+    360,
+    390,
+    1440
+  ],
+  "portalLinks": 2,
+  "pageErrors": [],
+  "scope": "Plan document only; no product implementation tested",
+  "localLinksChecked": 125,
+  "missingLocalLinks": [],
+  "documentsChecked": 12,
+  "taskDependenciesAcyclic": true,
+  "allTasksPlanned": true,
+  "independentReviewCorrections": 4
+}

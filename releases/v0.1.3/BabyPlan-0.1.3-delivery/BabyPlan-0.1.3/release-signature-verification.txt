@@ -1,0 +1,17 @@
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): false
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1
+Signer #1 certificate DN: CN=BabyPlan Local, OU=Private Family Use, O=BabyPlan, L=Local, ST=Local, C=CN
+Signer #1 certificate SHA-256 digest: 57bb97577d444e76b5d389f2d277cea033f4e8bdcc43bcce7578883bc37fa799
+Signer #1 certificate SHA-1 digest: d0edde0469b11980ce714784d19ede24f583d9ff
+Signer #1 certificate MD5 digest: 9f792ff411c2460d1910a25391fed044
+Signer #1 key algorithm: RSA
+Signer #1 key size (bits): 4096
+Signer #1 public key SHA-256 digest: e8e87fe65f48bd3d32b7c23b7c3362863f44577b800f4761f0026949f398454f
+Signer #1 public key SHA-1 digest: 473b10ba9d0197a10ae94e4cef3b32fa478dffb5
+Signer #1 public key MD5 digest: ed45150e662a48a266dc4b0889294ffc

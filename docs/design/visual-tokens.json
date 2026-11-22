@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "status": "candidate",
+  "description": "原型候选变量，未确认品牌；逻辑尺寸供设计参考，Web px不证明Flutter dp/sp行为",
+  "themes": {
+    "light": {
+      "background": "#F6F5EF",
+      "surface": "#FFFFFF",
+      "text": "#243D35",
+      "textSecondary": "#52665C",
+      "primary": "#32684B",
+      "onPrimary": "#FFFFFF",
+      "error": "#9C3029",
+      "warning": "#785014",
+      "outline": "#718078",
+      "dividerDecorative": "#DFE5DB",
+      "focus": "#32684B"
+    },
+    "dark": {
+      "background": "#17221C",
+      "surface": "#203028",
+      "text": "#EDF2EC",
+      "textSecondary": "#BAC8BC",
+      "primary": "#A7D0AF",
+      "onPrimary": "#14291B",
+      "error": "#FFB4AB",
+      "warning": "#E6C38A",
+      "outline": "#91A293",
+      "dividerDecorative": "#415147",
+      "focus": "#A7D0AF"
+    }
+  },
+  "contrastPairs": [
+    {"foreground": "text", "background": "background", "minimum": 4.5},
+    {"foreground": "text", "background": "surface", "minimum": 4.5},
+    {"foreground": "textSecondary", "background": "background", "minimum": 4.5},
+    {"foreground": "textSecondary", "background": "surface", "minimum": 4.5},
+    {"foreground": "onPrimary", "background": "primary", "minimum": 4.5},
+    {"foreground": "primary", "background": "surface", "minimum": 4.5},
+    {"foreground": "error", "background": "surface", "minimum": 4.5},
+    {"foreground": "warning", "background": "surface", "minimum": 4.5},
+    {"foreground": "outline", "background": "surface", "minimum": 3},
+    {"foreground": "focus", "background": "surface", "minimum": 3}
+  ],
+  "typography": {
+    "fontStackWeb": "system-ui, 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif",
+    "pageTitle": {"size": 26, "lineHeight": 1.35, "weight": 600},
+    "sectionTitle": {"size": 20, "lineHeight": 1.45, "weight": 600},
+    "body": {"size": 16, "lineHeight": 1.65, "weight": 400},
+    "label": {"size": 16, "lineHeight": 1.5, "weight": 600},
+    "caption": {"size": 14, "lineHeight": 1.55, "weight": 400}
+  },
+  "spacing": [4, 8, 12, 16, 24, 32, 48],
+  "radius": {"control": 8, "card": 16, "dialog": 20},
+  "layout": {"touchTarget": 48, "mobileGutter": 16, "desktopGutter": 24, "contentMaxWidth": 1200},
+  "motion": {"optionalTransitionMs": 150, "reducedMotionMs": 0}
+}

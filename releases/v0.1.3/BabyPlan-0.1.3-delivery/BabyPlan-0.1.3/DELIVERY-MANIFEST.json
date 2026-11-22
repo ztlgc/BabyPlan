@@ -1,0 +1,73 @@
+{
+  "product": "BabyPlan 小芽",
+  "version": "0.1.3",
+  "generatedAt": "2026-11-13T16:11:29.1132104Z",
+  "sourceChecksumManifest": "SHA256SUMS.txt",
+  "files": [
+    {
+      "entry": "BabyPlan-0.1.3/BabyPlan_0.1.3_private-release.apk",
+      "source": "releases/v0.1.3/BabyPlan_0.1.3_private-release.apk",
+      "bytes": 60784434,
+      "sha256": "f142bacc31fb4ca7fd5b0a3f0d0aa6a43a4486586147ce1e312975bb26320838"
+    },
+    {
+      "entry": "BabyPlan-0.1.3/BabyPlan_0.1.3_lan-debug.apk",
+      "source": "releases/v0.1.3/BabyPlan_0.1.3_lan-debug.apk",
+      "bytes": 188595921,
+      "sha256": "929df2559a9fca1ee44c8981ef6a08d74a12cfe52238e79fa51642b79ac3586a"
+    },
+    {
+      "entry": "BabyPlan-0.1.3/babyplan-signing-certificate.pem",
+      "source": "releases/v0.1.3/babyplan-signing-certificate.pem",
+      "bytes": 2024,
+      "sha256": "0ca8a648d3d5a068b55cde7c30128f40a90f36962c0d45f39f983de2772f9ade"
+    },
+    {
+      "entry": "BabyPlan-0.1.3/SHA256SUMS.txt",
+      "source": "releases/v0.1.3/SHA256SUMS.txt",
+      "bytes": 298,
+      "sha256": "a9dc877da225e92c75dde58fb5ef7bb3982133f85352517584301f7192dd48f8"
+    },
+    {
+      "entry": "BabyPlan-0.1.3/manifest.json",
+      "source": "releases/v0.1.3/manifest.json",
+      "bytes": 1924,
+      "sha256": "06f680cf117eb7f32f0b860077d3b57bd4c36732bffb008c3d6a2c4477db3f25"
+    },
+    {
+      "entry": "BabyPlan-0.1.3/release-signature-verification.txt",
+      "source": "releases/v0.1.3/release-signature-verification.txt",
+      "bytes": 1016,
+      "sha256": "cbe8d7b724cfa4f5b8521f0bc626eba43c7bacca9844578107cf0d49a262185f"
+    },
+    {
+      "entry": "BabyPlan-0.1.3/release-badging.txt",
+      "source": "releases/v0.1.3/release-badging.txt",
+      "bytes": 1411,
+      "sha256": "06917ef1b7ce45a97a588bae023c2c794bf36d586ad39990bc9a05063649649d"
+    },
+    {
+      "entry": "BabyPlan-0.1.3/BabyPlan-0.1.3-windows-service.zip",
+      "source": "releases/v0.1.3/BabyPlan-0.1.3-windows-service.zip",
+      "bytes": 302632,
+      "sha256": "bfefb83aa9f93b24a1c64c5d804cc06c5228d82a03212e707f19840447b39ea4"
+    },
+    {
+      "entry": "BabyPlan-0.1.3/docs/家长使用与交付说明.md",
+      "source": "docs/家长使用与交付说明.md",
+      "bytes": 9135,
+      "sha256": "4e26d05c319ec6f5f907f251a8d7f24eeb755ef82e0c705580cb24c0c0ef95a0"
+    },
+    {
+      "entry": "BabyPlan-0.1.3/docs/私有部署与备份恢复.md",
+      "source": "docs/ops/私有部署与备份恢复.md",
+      "bytes": 17000,
+      "sha256": "26d0e40036c94fde82c89576315b77133593775c8d9a555bbaf27fff61d08c7e"
+    }
+  ],
+  "disclaimer": [
+    "交付包含私人签名 Release APK 和局域网 Debug APK。",
+    "未包含私钥、keystore、数据库、备份、媒体、环境变量或真实家庭资料。",
+    "真机通知、系统选图、双机同步、公网 TLS、生产部署和人工内容审读仍需另行验收。"
+  ]
+}

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>BabyPlan · 内容管理区低保真</title>
+<link rel="stylesheet" href="styles.css"><script src="../mobile/fixture.js" defer></script><script src="app.js" defer></script>
+</head><body>
+<a class="skip" href="#screen">跳到内容管理区</a>
+<header class="site-head"><strong>BabyPlan <span>内容管理区</span></strong><p>低保真 · 扩展原型（未合同化） · 仅使用虚构内容</p></header>
+<div class="workspace"><section class="product" aria-label="内容管理原型">
+<p class="demo">本地模拟 · 刷新即重置；不进行真实鉴权或发布，不浏览家庭私人记录。</p>
+<header class="product-head"><p id="identity"></p><nav id="nav" aria-label="内容管理导航"></nav></header>
+<main id="screen" tabindex="-1"></main></section>
+<aside class="review" aria-label="设计审阅工具"><details id="review" open><summary>设计审阅面板 <span>不属于产品界面</span></summary>
+<label for="scenario">演示场景</label><select id="scenario"></select><p id="expectation" class="note"></p>
+<label for="role">虚构管理角色（候选）</label><select id="role"><option value="demo_editor">内容编辑</option><option value="demo_reviewer">内容审核</option><option value="demo_publisher">内容发布</option><option value="demo_viewer">只读查看</option><option value="none">无管理权限</option></select>
+<p class="note">切换角色只改变演示权限，保留工作流；审核通过后，发布角色才能发布。</p>
+<label for="theme">主题</label><select id="theme"><option value="light">浅色灰阶</option><option value="dark">深色灰阶</option></select>
+<label for="font">字号</label><select id="font"><option value="1">100%</option><option value="2">200%</option></select>
+<label class="check"><input id="offline" type="checkbox">断网（模拟）</label>
+<label class="check"><input id="failure" type="checkbox">下一次操作失败</label>
+<div class="stack"><button data-action="draft-conflict">模拟他人更新草稿</button><button data-action="publish-conflict">模拟他人发布新版</button><button data-action="reset">重置全部演示</button></div>
+<dl><div><dt>当前页面</dt><dd id="page-code"></dd></div><div><dt>固定时钟</dt><dd>2026-11-11 15:00 Asia/Shanghai</dd></div></dl>
+<p class="note">角色、版本规则和撤回影响均为候选。这里的发布或撤回不会改变家长区、历史、已开展或家长调整的内容。</p>
+<a href="../index.html">返回三端评审入口</a></details></aside></div>
+<dialog id="modal" aria-labelledby="modal-title"></dialog><div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
+</body></html>

@@ -1,0 +1,35 @@
+{
+  "name": "@babyplan/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "dev": "node --import tsx src/server.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/server.js",
+    "typecheck": "tsc --noEmit",
+    "db:migrate": "node --import tsx src/cli/migrate.ts",
+    "admin:create-user": "node --import tsx src/cli/create-user.ts",
+    "content:import": "node --import tsx src/cli/content.ts import",
+    "content:publish": "node --import tsx src/cli/content.ts publish",
+    "test": "node --import tsx --test --test-concurrency=1 test/*.test.ts"
+  },
+  "dependencies": {
+    "@fastify/cookie": "11.0.2",
+    "@node-rs/argon2": "2.0.2",
+    "ajv": "8.20.0",
+    "fastify": "5.12.8",
+    "pg": "8.23.1",
+    "sharp": "0.35.5",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "@types/pg": "8.23.1",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3"
+  }
+}

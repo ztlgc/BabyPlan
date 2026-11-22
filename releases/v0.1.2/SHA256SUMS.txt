@@ -1,0 +1,3 @@
+8317beaa9374bfee44351e9c675a838b4af98b85df1dd9ca0fa4f81865f1b419  BabyPlan_0.1.2_private-release.apk
+7d762b614cdf47ccea1f97be72043a53ba824fb7d852fc649f221b17ce8b4de5  BabyPlan_0.1.2_lan-debug.apk
+0ca8a648d3d5a068b55cde7c30128f40a90f36962c0d45f39f983de2772f9ade  babyplan-signing-certificate.pem

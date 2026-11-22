@@ -1,0 +1,99 @@
+name: babyplan
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: babyplan
+      POSTGRES_USER: babyplan
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?请设置 POSTGRES_PASSWORD}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - babyplan_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U babyplan -d babyplan"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    shm_size: 128mb
+    mem_limit: 384m
+    command:
+      - postgres
+      - -c
+      - shared_buffers=96MB
+      - -c
+      - effective_cache_size=256MB
+      - -c
+      - work_mem=4MB
+      - -c
+      - maintenance_work_mem=32MB
+      - -c
+      - max_connections=20
+      - -c
+      - timezone=Asia/Shanghai
+
+  api:
+    build:
+      context: ../..
+      dockerfile: ops/linux/api.Dockerfile
+    restart: unless-stopped
+    init: true
+    env_file:
+      - ${BABYPLAN_CONFIG_DIR:?请设置 BABYPLAN_CONFIG_DIR}/babyplan.env
+    environment:
+      DATABASE_URL: postgresql://babyplan:${POSTGRES_PASSWORD}@db:5432/babyplan
+    volumes:
+      - ${BABYPLAN_DATA_DIR:?请设置 BABYPLAN_DATA_DIR}/media:/data/media
+      - ${BABYPLAN_DATA_DIR:?请设置 BABYPLAN_DATA_DIR}/recovery-outbox:/data/recovery-outbox
+      - ${BABYPLAN_DATA_DIR:?请设置 BABYPLAN_DATA_DIR}/deletion-journal:/data/deletion-journal
+      - ${BABYPLAN_DATA_DIR:?请设置 BABYPLAN_DATA_DIR}/backups:/data/backups
+      - ${BABYPLAN_DATA_DIR:?请设置 BABYPLAN_DATA_DIR}/restores:/data/restores
+      - ${BABYPLAN_REPO_DIR:?请设置 BABYPLAN_REPO_DIR}/content:/repo/content:ro
+    ports:
+      - "4318:4318"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:4318/health/live').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    mem_limit: 384m
+
+  web:
+    build:
+      context: ../..
+      dockerfile: ops/linux/web.Dockerfile
+    restart: unless-stopped
+    init: true
+    environment:
+      WEB_HOST: 0.0.0.0
+      WEB_PORT: 4174
+      BABYPLAN_API_TARGET: http://api:4318
+    ports:
+      - "4174:4174"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:4174/').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    mem_limit: 96m
+
+volumes:
+  babyplan_pgdata:

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>小芽 · BabyPlan｜陪伴设计预览</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="lucide.min.js" defer></script>
+  <script src="content.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="reviewbar" id="reviewbar">
+    <a class="review-brand" href="../../打开设计.html">BabyPlan <span>DESIGN / 02</span></a>
+    <nav aria-label="预览端"><a href="?surface=mobile#today" data-surface="mobile">手机体验</a><a href="?surface=parent#today" data-surface="parent">家长网页</a><a href="?surface=admin#library" data-surface="admin">内容工作台</a></nav>
+    <button class="review-toggle" id="review-toggle" aria-expanded="false">演示选项</button>
+  </header>
+  <section id="review-options" class="review-options" aria-label="原型演示选项" hidden>
+    <label>演示状态<select id="scenario"><option value="normal">正常</option><option value="offline">离线，已有缓存</option><option value="conflict">记录冲突</option><option value="error">加载失败</option><option value="empty">无可用内容</option></select></label>
+    <label>外观<select id="theme"><option value="light">纸白</option><option value="dark">夜间</option></select></label>
+    <label>文字<select id="font-scale"><option value="1">标准</option><option value="2">200%</option></select></label>
+    <label>模拟成员<select id="member"><option value="me">我</option><option value="partner">另一位家长</option></select></label>
+    <button id="reset-demo" class="secondary">重置演示记录</button>
+    <p>虚构数据 · 仅本浏览器保存 · 无真实通知、账号同步或上传</p>
+  </section>
+  <div id="workspace" class="workspace">
+    <aside class="design-caption" id="design-caption">
+      <div class="eyebrow">LITTLE MOMENTS, TOGETHER</div>
+      <h1>把今天的陪伴<br>准备好。</h1>
+      <p>少一点“该教什么”的犹豫，<br>多一点面对面的时光。</p>
+      <div class="caption-line"></div>
+      <ol><li><span>01</span>拿起手机，看一眼怎么玩</li><li><span>02</span>放下手机，跟着宝宝的兴趣</li><li><span>03</span>留下一句，记住这个小瞬间</li></ol>
+      <p class="caption-note">18～23月 · 亲子游戏与中英共读<br>可点击预览 · 所有保存均为本机演示</p>
+    </aside>
+    <div id="app" class="app"></div>
+  </div>
+  <dialog id="sheet" aria-labelledby="sheet-title"></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

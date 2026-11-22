@@ -1,0 +1,51 @@
+{
+  "product": "BabyPlan 小芽",
+  "version": "0.1.0",
+  "versionCode": 1,
+  "builtOn": "2026-11-13",
+  "variants": [
+    {
+      "name": "private-release",
+      "file": "BabyPlan_0.1.0_private-release.apk",
+      "bytes": 59928729,
+      "sha256": "0a9dcea628873a1e7a40ba10a837363afba93f4a45171c41db0bb2f02c337c0c",
+      "applicationId": "app.babyplan.babyplan",
+      "signature": "v2",
+      "keystore": "local-private-sustainable",
+      "network": "HTTPS only",
+      "purpose": "长期私人使用及需要 HTTPS 的部署"
+    },
+    {
+      "name": "lan-debug",
+      "file": "BabyPlan_0.1.0_lan-debug.apk",
+      "bytes": 190205909,
+      "sha256": "b2eb71e285176a32f6112ea46e9e7b777db33bd575f2d124023f567078f16448",
+      "applicationId": "app.babyplan.babyplan.dev",
+      "signature": "Android debug v2",
+      "network": "HTTP LAN or HTTPS",
+      "purpose": "同一局域网首次试用；不能替代正式发布签名"
+    }
+  ],
+  "releaseCertificateSha256": "57bb97577d444e76b5d389f2d277cea033f4e8bdcc43bcce7578883bc37fa799",
+  "certificateFileSha256": "0ca8a648d3d5a068b55cde7c30128f40a90f36962c0d45f39f983de2772f9ade",
+  "minSdk": 24,
+  "targetSdk": 36,
+  "compileSdk": 37,
+  "contentPackage": "babyplan-m18-design",
+  "contentVersion": 1,
+  "contentReview": "candidate/draft; not human reviewed",
+  "verified": [
+    "APK Signature Scheme v2",
+    "aapt2 badging",
+    "Flutter test 52/52",
+    "Flutter analyze",
+    "release/debug build"
+  ],
+  "unverified": [
+    "real Android device",
+    "notification delivery",
+    "photo picker",
+    "two-device sync",
+    "public HTTPS deployment"
+  ]
+}
